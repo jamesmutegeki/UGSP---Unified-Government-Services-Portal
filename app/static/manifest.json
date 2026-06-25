@@ -1,0 +1,16 @@
+{
+  "name": "UGSP — Unified Government Service Portal",
+  "short_name": "UGSP",
+  "description": "Republic of Uganda — Unified Government Service Portal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#0c2d5e",
+  "orientation": "any",
+  "icons": [
+    { "src": "/static/coat-of-arms.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any maskable" },
+    { "src": "/static/coat-of-arms.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any maskable" }
+  ],
+  "categories": ["government", "utilities"],
+  "lang": "en-UG"
+}

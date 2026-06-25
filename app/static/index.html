@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UGSP — Unified Government Service Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --navy: #0c2d5e; --navy-light: #1a3f7a; --steel: #2e6b9e; --steel-light: #4a8bc2;
+  --gold: #c8a84e; --gold-light: #e0c66a; --bg: #f0f2f5; --surface: #ffffff;
+  --text: #1a1a2e; --text-secondary: #5a6a7e; --border: #dce0e5;
+  --success: #2e7d32; --warning: #f9a825; --error: #c62828;
+  --radius: 12px; --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(12,45,94,0.08), 0 1px 2px rgba(12,45,94,0.06);
+  --shadow-lg: 0 4px 16px rgba(12,45,94,0.12);
+  --sidebar-w: 260px; --top-h: 64px; --transition: 0.2s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
+.skip-link{position:absolute;top:-100px;left:8px;background:var(--navy);color:white;padding:8px 16px;border-radius:4px;z-index:9999;font-size:0.85rem}
+.skip-link:focus{top:8px}
+/* Password toggle */
+.pw-wrap{position:relative;display:flex;align-items:center}
+.pw-wrap input{flex:1;padding-right:40px}
+.pw-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);padding:6px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:1.15rem}
+.pw-toggle:hover{color:var(--steel);background:rgba(0,0,0,0.04)}
+/* Login - Mountain Rwenzori Ken Burns */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.ken-burns-bg{position:absolute;inset:0;background:url('/static/jinja-sunset.jpg') center/cover no-repeat;animation:kenBurns 20s ease-in-out infinite alternate;z-index:0}
+@keyframes kenBurns{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.03) translate(-1%,-1%)}}
+.login-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(12,45,94,0.75),rgba(10,35,69,0.85));z-index:1}
+.login-card{background:var(--surface);border-radius:20px;padding:48px 40px;width:420px;max-width:92vw;box-shadow:0 24px 48px rgba(0,0,0,0.4);text-align:center;position:relative;z-index:2}
+.coat-of-arms{width:100px;height:100px;margin:0 auto 8px;object-fit:contain;display:block;padding:4px}
+.login-card h1{font-size:1.3rem;font-weight:700;margin-bottom:2px}
+.login-card .subtitle{font-size:0.82rem;color:var(--text-secondary);margin-bottom:20px}
+.form-group{text-align:left;margin-bottom:14px}
+.form-group label{display:block;font-size:0.78rem;font-weight:600;margin-bottom:4px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.03em}
+.form-group input,.form-group select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:inherit;transition:border-color var(--transition);background:#fafbfc}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--steel);background:white}
+.form-group select{appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%235a6a7e'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 12px center/12px no-repeat #fafbfc}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:var(--radius-sm);border:none;font-family:inherit;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all var(--transition)}
+.btn-primary{background:var(--navy);color:white;width:100%;padding:14px}
+.btn-primary:hover{background:var(--navy-light);transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.btn-secondary{background:var(--bg);color:var(--text)}
+.btn-secondary:hover{background:var(--border)}
+.btn-ghost{background:transparent;color:var(--steel)}
+.btn-ghost:hover{background:rgba(46,107,158,0.08)}
+.btn-sm{padding:8px 16px;font-size:0.8rem}
+.btn-success{background:var(--success);color:white}
+.btn-success:hover{background:#236b26}
+.btn-danger{background:var(--error);color:white}
+.btn-danger:hover{background:#a02222}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.login-error{color:var(--error);font-size:0.85rem;margin-top:8px;min-height:1.3em}
+.login-footer{margin-top:16px;font-size:0.78rem;color:var(--text-secondary)}
+.login-footer a{color:var(--steel);font-weight:500;cursor:pointer}
+.login-footer a:hover{text-decoration:underline}
+.separator{display:flex;align-items:center;gap:12px;margin:16px 0;font-size:0.8rem;color:var(--text-secondary)}
+.separator::before,.separator::after{content:'';flex:1;height:1px;background:var(--border)}
+/* App layout */
+.app-layout{display:none;min-height:100vh}.app-layout.active{display:flex}
+/* Sidebar */
+.sidebar{width:var(--sidebar-w);background:var(--navy);color:white;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100;transition:transform var(--transition)}
+.sidebar-header{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.1);min-height:var(--top-h)}
+.sidebar-collapse{margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:4px;border-radius:4px;font-size:1.1rem;transition:color var(--transition),transform var(--transition)}
+.sidebar-collapse:hover{color:white;background:rgba(255,255,255,0.1)}
+.sidebar-collapse.collapsed{transform:rotate(180deg)}
+.sidebar-header .logo{width:38px;height:38px;flex-shrink:0;fill:var(--gold)}
+.sidebar-header .logo-text h2{font-size:0.9rem;font-weight:600;line-height:1.1}
+.sidebar-header .logo-text small{font-size:0.6rem;opacity:0.7;display:block}
+.sidebar-nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;color:rgba(255,255,255,0.7);cursor:pointer;transition:all var(--transition);border:none;background:none;width:100%;font-family:inherit;font-size:0.85rem;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:white}
+.nav-item.active{background:rgba(255,255,255,0.12);color:white;font-weight:500;border-right:3px solid var(--gold)}
+.nav-item .icon{font-size:1.2rem}
+.nav-item .badge{margin-left:auto;background:var(--gold);color:var(--navy);font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:10px}
+.sidebar-footer{padding:10px 16px;border-top:1px solid rgba(255,255,255,0.1)}
+.user-info{display:flex;align-items:center;gap:10px}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:var(--steel);display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:600;color:white;flex-shrink:0;overflow:hidden}
+.user-avatar img{width:100%;height:100%;object-fit:cover}
+.user-details{flex:1;min-width:0}
+.user-name{font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-nin{font-size:0.68rem;opacity:0.6}
+.logout-btn{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:4px;border-radius:4px}
+.logout-btn:hover{color:white;background:rgba(255,255,255,0.1)}
+/* Main */
+.main-content{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
+.top-bar{height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:50}
+.menu-toggle{display:none;background:none;border:none;cursor:pointer;color:var(--text);padding:6px;border-radius:4px}
+.menu-toggle:hover{background:var(--bg)}
+.search-bar{flex:1;max-width:440px;position:relative}
+.search-bar input{width:100%;padding:8px 14px 8px 40px;border-radius:24px;border:2px solid var(--border);font-family:inherit;font-size:0.85rem;background:var(--bg);transition:all var(--transition)}
+.search-bar input:focus{outline:none;border-color:var(--steel);background:white}
+.search-bar .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-secondary);font-size:1.1rem}
+.top-bar-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.notif-btn{background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:6px;border-radius:50%;position:relative}
+.notif-btn:hover{background:var(--bg);color:var(--text)}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--error);border-radius:50%;border:2px solid var(--surface)}
+/* Notification panel */
+.notif-panel{position:fixed;top:0;right:-360px;width:340px;height:100vh;background:var(--surface);box-shadow:-4px 0 24px rgba(0,0,0,0.15);z-index:1000;transition:right 0.3s ease;display:flex;flex-direction:column}
+.notif-panel.open{right:0}
+.notif-panel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-panel-header h3{font-size:1rem;font-weight:600}
+.notif-panel-body{flex:1;overflow-y:auto;padding:8px 0}
+.notif-item{padding:14px 20px;border-bottom:1px solid var(--border);font-size:0.85rem;display:flex;gap:10px;align-items:flex-start}
+.notif-item .notif-icon{font-size:1.2rem;color:var(--steel);flex-shrink:0;margin-top:2px}
+.notif-empty{padding:40px 20px;text-align:center;color:var(--text-secondary)}
+.notif-overlay{display:none;position:fixed;inset:0;z-index:990;background:transparent}
+.notif-overlay.active{display:block}
+/* Page */
+.page{display:none;padding:20px}
+.page.active{display:block}
+.page-header{margin-bottom:20px}
+.page-header h2{font-size:1.4rem;font-weight:700}
+.page-header p{color:var(--text-secondary);font-size:0.88rem;margin-top:2px}
+/* Cards */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;border:1px solid var(--border)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{padding:18px}
+.stat-card .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:10px}
+.stat-card .stat-value{font-size:1.5rem;font-weight:700;line-height:1.2}
+.stat-card .stat-label{font-size:0.8rem;color:var(--text-secondary)}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.section-header h3{font-size:1.05rem;font-weight:600}
+/* Service grid */
+.service-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.service-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:18px;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow)}
+.service-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--steel-light)}
+.service-card .srv-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:10px}
+.service-card h4{font-size:0.92rem;font-weight:600;margin-bottom:3px}
+.service-card .ministry{font-size:0.75rem;color:var(--steel);font-weight:500;margin-bottom:5px}
+.service-card p{font-size:0.8rem;color:var(--text-secondary);line-height:1.4;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.service-card .foot{display:flex;align-items:center;justify-content:space-between}
+.service-card .fee{font-weight:700;color:var(--navy);font-size:0.88rem}
+.service-card .fee.free{color:var(--success)}
+/* Cat tabs */
+.cat-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.cat-tab{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all var(--transition);color:var(--text-secondary)}
+.cat-tab:hover{border-color:var(--steel);color:var(--steel)}
+.cat-tab.active{background:var(--navy);color:white;border-color:var(--navy)}
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+thead th{text-align:left;padding:10px 14px;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);border-bottom:2px solid var(--border);font-weight:600}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:hover{background:#f8fafc}
+.status-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;text-transform:capitalize}
+.status-submitted{background:#e3f2fd;color:#1565c0}
+.status-under_review{background:#fff3e0;color:#e65100}
+.status-approved{background:#e8f5e9;color:#2e7d32}
+.status-rejected{background:#fce4ec;color:#c62828}
+.status-draft{background:#f3e5f5;color:#7b1fa2}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.active{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);width:540px;max-width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 48px rgba(0,0,0,0.2)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:1.05rem;font-weight:600}
+.modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-secondary);padding:4px;border-radius:4px}
+.modal-close:hover{background:var(--bg);color:var(--text)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+/* Checkout */
+.checkout-summary{background:#f8fafc;border-radius:var(--radius-sm);padding:14px;margin-bottom:14px}
+.checkout-row{display:flex;justify-content:space-between;padding:6px 0;font-size:0.88rem}
+.checkout-row.total{border-top:2px solid var(--border);margin-top:6px;padding-top:10px;font-weight:700;font-size:0.95rem}
+.payment-channels{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pay-channel{display:flex;align-items:center;gap:8px;padding:12px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);background:white}
+.pay-channel:hover{border-color:var(--steel-light)}
+.pay-channel.selected{border-color:var(--steel);background:#eef5fb}
+.pay-channel input[type="radio"]{accent-color:var(--navy)}
+.prn-box{background:var(--navy);color:white;border-radius:var(--radius-sm);padding:18px;text-align:center;margin-top:14px}
+.prn-box .prn-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;opacity:0.7}
+.prn-box .prn-value{font-size:1.5rem;font-weight:800;letter-spacing:0.05em;margin:6px 0}
+.prn-box .prn-note{font-size:0.8rem;opacity:0.8}
+/* Search */
+.search-page .search-input-wrap{margin-bottom:16px}
+.search-page .search-input-wrap input{width:100%;padding:12px 16px;border-radius:var(--radius);border:2px solid var(--border);font-family:inherit;font-size:0.95rem}
+.search-page .search-input-wrap input:focus{outline:none;border-color:var(--steel)}
+.search-result{padding:14px 0;border-bottom:1px solid var(--border)}
+.search-result:last-child{border-bottom:none}
+.search-result h4{font-size:0.92rem;font-weight:600}
+.search-result .ministry{font-size:0.75rem;color:var(--steel)}
+.search-result p{font-size:0.82rem;color:var(--text-secondary);margin-top:3px}
+/* Messages */
+.msg{padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:10px;font-size:0.82rem;display:none;position:fixed;top:80px;right:20px;z-index:400;box-shadow:var(--shadow-lg);max-width:400px}
+.msg.show{display:block;animation:slideIn 0.3s ease}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.msg-success{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7}
+.msg-error{background:#fce4ec;color:#b71c1c;border:1px solid #ef9a9a}
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-secondary)}
+.empty-state .empty-icon{font-size:2.5rem;margin-bottom:10px;opacity:0.4}
+.empty-state h4{font-weight:600;margin-bottom:3px}
+.empty-state p{font-size:0.82rem}
+/* Loading */
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--text-secondary);gap:8px}
+/* Ministries */
+.ministry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.ministry-card{padding:16px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--border);transition:all var(--transition)}
+.ministry-card:hover{border-color:var(--steel-light);box-shadow:var(--shadow)}
+.ministry-card .m-name{font-weight:600;font-size:0.9rem}
+.ministry-card .m-full{font-size:0.78rem;color:var(--text-secondary);margin:3px 0 6px}
+.ministry-card .m-cat{font-size:0.7rem;background:var(--bg);padding:2px 8px;border-radius:4px;display:inline-block;text-transform:capitalize}
+.ministry-card .m-link{font-size:0.78rem;display:inline-flex;align-items:center;gap:4px;margin-top:6px}
+/* Map */
+.map-container{height:500px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+/* Photo upload */
+.photo-upload-wrap{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.photo-preview{width:80px;height:80px;border-radius:50%;background:var(--bg);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:2rem;color:var(--text-secondary);flex-shrink:0}
+.photo-preview img{width:100%;height:100%;object-fit:cover}
+.upload-btn-wrapper{position:relative;overflow:hidden;display:inline-block}
+.upload-btn-wrapper input[type=file]{position:absolute;left:0;top:0;opacity:0;width:100%;height:100%;cursor:pointer}
+/* Registration / Forgot */
+.auth-toggle{color:var(--steel);font-weight:500;cursor:pointer}
+.auth-toggle:hover{text-decoration:underline}
+.wide-modal .modal{width:640px}
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0}.menu-toggle{display:block}
+  .stat-grid{grid-template-columns:1fr 1fr}.service-grid,.ministry-grid{grid-template-columns:1fr}
+  .payment-channels{grid-template-columns:1fr}.page{padding:14px}
+  .login-card{padding:32px 24px}.notif-panel{width:100%;right:-100%}
+  .map-container{height:320px}
+}
+/* Coat of arms logo */
+.coa-sidebar{width:36px;height:36px;object-fit:contain;flex-shrink:0;display:block}
+/* Global sidebar collapsed state */
+.app-layout.sidebar-collapsed .sidebar{transform:translateX(-100%)}
+.app-layout.sidebar-collapsed .main-content{margin-left:0}
+.app-layout.sidebar-collapsed .menu-toggle{display:block}
+@media(width>=769px){.app-layout.sidebar-collapsed .menu-toggle{display:block}}
+/* Clickable notification */
+.notif-item.clickable{padding:12px 20px;cursor:pointer;transition:background var(--transition)}
+.notif-item.clickable:hover{background:#f0f4f8}
+.notif-item.clickable .notif-title{font-weight:600;font-size:0.88rem}
+.notif-item.clickable .notif-sub{font-size:0.75rem;color:var(--text-secondary)}
+/* Ministry SVG logo */
+.m-logo-svg{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:10px;overflow:hidden}
+.m-logo-svg svg{width:100%;height:100%}
+/* Dashboard stat cards clickable */
+.stat-click{cursor:pointer;transition:all var(--transition)}
+.stat-click:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--steel-light)}
+/* Map search & controls */
+.map-controls{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.map-search-wrap{flex:1;min-width:180px;position:relative}
+.map-search-wrap input{width:100%;padding:9px 14px 9px 38px;border-radius:var(--radius-sm);border:2px solid var(--border);font-family:inherit;font-size:0.85rem;background:white;transition:border-color var(--transition)}
+.map-search-wrap input:focus{outline:none;border-color:var(--steel)}
+.map-search-wrap .map-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-secondary);font-size:1.1rem}
+.btn-fullscreen{background:var(--navy);color:white;border:none;border-radius:var(--radius-sm);padding:8px 14px;cursor:pointer;font-size:0.8rem;font-family:inherit;font-weight:500;display:inline-flex;align-items:center;gap:4px;transition:all var(--transition)}
+.btn-fullscreen:hover{background:var(--navy-light)}
+.map-wrapper{position:relative;transition:all 0.3s ease}
+.map-wrapper.fullscreen{position:fixed;inset:0;z-index:900;border-radius:0;margin:0;padding:0}
+.map-wrapper.fullscreen .map-container{height:100vh;border-radius:0}
+.map-wrapper.fullscreen .map-controls{padding:10px 14px;background:rgba(255,255,255,0.95);margin:0;border-radius:0}
+.map-wrapper.fullscreen .map-controls-wrap{position:absolute;top:0;left:0;right:0;z-index:1000}
+.map-notif-overlay{display:none;position:absolute;top:60px;right:14px;z-index:999;max-width:320px;width:100%}
+.map-notif-overlay.active{display:block}
+.map-notif-item{background:var(--surface);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:6px;box-shadow:var(--shadow-lg);border-left:3px solid var(--steel);font-size:0.82rem;display:flex;gap:8px;align-items:flex-start;animation:slideDown 0.2s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.map-legend{background:white;border-radius:var(--radius-sm);padding:10px 14px;box-shadow:var(--shadow);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;font-size:0.78rem}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+/* 2FA */
+.tfa-section{display:none;margin-top:14px;padding:16px;background:#f8fafc;border-radius:var(--radius-sm);border:1px solid var(--border)}
+.tfa-section.active{display:block}
+.tfa-code-inputs{display:flex;gap:8px;justify-content:center;margin:12px 0}
+.tfa-code-inputs input{width:40px;height:44px;text-align:center;font-size:1.2rem;font-weight:700;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit}
+.tfa-code-inputs input:focus{outline:none;border-color:var(--steel)}
+.tfa-device{font-size:0.78rem;color:var(--text-secondary);margin-bottom:6px}
+/* Feedback */
+.feedback-fab{position:fixed;bottom:24px;right:24px;z-index:800;width:52px;height:52px;border-radius:50%;background:var(--gold);color:var(--navy);border:none;cursor:pointer;box-shadow:0 4px 16px rgba(200,168,78,0.4);display:flex;align-items:center;justify-content:center;font-size:1.4rem;transition:all var(--transition)}
+.feedback-fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(200,168,78,0.5)}
+.feedback-rating{display:flex;gap:6px;justify-content:center;margin:12px 0}
+.feedback-star{font-size:1.8rem;cursor:pointer;color:var(--border);transition:color var(--transition)}
+.feedback-star.active{color:var(--gold)}
+/* New Pages */
+.page-2col{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+.doc-card{background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;gap:14px;align-items:center;transition:all var(--transition)}
+.doc-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.doc-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.doc-info{flex:1;min-width:0}
+.doc-info .d-name{font-weight:600;font-size:0.88rem}
+.doc-info .d-meta{font-size:0.76rem;color:var(--text-secondary);margin-top:2px}
+.doc-badge{font-size:0.7rem;padding:2px 8px;border-radius:20px;font-weight:600}
+.doc-badge.active{background:#e8f5e9;color:#2e7d32}
+.doc-badge.expired{background:#fbe9e7;color:#c62828}
+.doc-dl{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--steel);transition:all var(--transition)}
+.doc-dl:hover{background:var(--steel);color:white}
+.pay-card{background:var(--surface);border-radius:var(--radius);padding:16px 20px;box-shadow:var(--shadow);display:flex;gap:14px;align-items:center}
+.pay-card .pay-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pay-details{flex:1;min-width:0}
+.pay-prn{font-weight:600;font-size:0.84rem;font-family:monospace}
+.pay-meta{font-size:0.76rem;color:var(--text-secondary);margin-top:1px}
+.pay-amount{font-weight:700;font-size:0.95rem;white-space:nowrap}
+.settings-card{background:var(--surface);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:16px}
+.settings-card h4{font-size:0.9rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.settings-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-row .sl-label{font-size:0.84rem}
+.settings-row .sl-desc{font-size:0.74rem;color:var(--text-secondary)}
+.help-search{position:relative;margin-bottom:20px}
+.help-search input{width:100%;padding:12px 16px 12px 44px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.88rem;transition:border-color var(--transition)}
+.help-search input:focus{outline:none;border-color:var(--steel)}
+.help-search .hs-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-secondary)}
+.help-cat{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:14px}
+.help-cat h4{font-size:0.88rem;margin-bottom:10px;display:flex;align-items:center;gap:8px;color:var(--navy)}
+.help-faq{border-top:1px solid var(--border);padding:10px 0}
+.help-faq .hq{cursor:pointer;font-size:0.84rem;font-weight:500;display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.help-faq .hq:hover{color:var(--steel)}
+.help-faq .ha{font-size:0.82rem;color:var(--text-secondary);padding:8px 0 4px;display:none;line-height:1.6}
+.help-faq.open .ha{display:block}
+.about-hero{background:linear-gradient(135deg,var(--navy),var(--navy-light));border-radius:var(--radius);padding:32px;color:white;margin-bottom:20px}
+.about-hero h2{font-size:1.3rem;margin-bottom:6px}
+.about-hero p{font-size:0.88rem;opacity:0.9;max-width:600px}
+.about-section{background:var(--surface);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:14px}
+.about-section h4{font-size:0.9rem;margin-bottom:8px;color:var(--navy)}
+.about-section p,.about-section li{font-size:0.84rem;color:var(--text-secondary);line-height:1.6}
+.about-section ul{margin:6px 0 0 18px}
+.about-section li{margin-bottom:4px}
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:10px;height:10px;border-radius:50%;background:var(--steel-light);margin-top:5px;flex-shrink:0}
+.activity-item .a-text{font-size:0.84rem}
+.activity-item .a-meta{font-size:0.74rem;color:var(--text-secondary);margin-top:1px}
+.news-card{background:var(--surface);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:12px;transition:all var(--transition)}
+.news-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.news-card .news-tag{font-size:0.68rem;padding:2px 10px;border-radius:20px;background:var(--bg);color:var(--text-secondary);display:inline-block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em}
+.news-card .news-tag.service{background:#e3f2fd;color:#1565c0}
+.news-card .news-tag.announcement{background:#fff3e0;color:#e65100}
+.news-card .news-tag.update{background:#e8f5e9;color:#2e7d32}
+.news-card h4{font-size:0.92rem;margin-bottom:4px}
+.news-card p{font-size:0.82rem;color:var(--text-secondary);line-height:1.5}
+.news-card .news-date{font-size:0.72rem;color:var(--text-secondary);margin-top:6px}
+.toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:24px;transition:0.3s}
+.toggle-slider::before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s}
+.toggle input:checked+.toggle-slider{background:var(--steel)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px)}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- Login -->
+<div id="loginPage" class="login-page">
+  <div class="ken-burns-bg"></div>
+  <div class="login-overlay"></div>
+  <div class="login-card" role="dialog" aria-label="Login">
+    <img class="coat-of-arms" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms">
+    <h1>Unified Government Service Portal</h1>
+    <p class="subtitle">Republic of Uganda — UGPass Single Sign-On</p>
+    <div class="form-group"><label for="loginNin">National ID (NIN)</label><input type="text" id="loginNin" placeholder="e.g. T1234567890" autocomplete="username" aria-required="true"></div>
+    <div class="form-group"><label for="loginPass">Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="UGPass password" autocomplete="current-password" aria-required="true"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('loginPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Sign in with UGPass</button>
+    <p class="login-error" id="loginError" role="alert"></p>
+    <div class="tfa-section" id="tfaSection">
+      <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px">Two-Factor Authentication</div>
+      <div class="tfa-device"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">smartphone</span> Enter the 6-digit code sent to your registered device</div>
+      <div class="tfa-code-inputs" id="tfaInputs">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,1)" onkeydown="tfaBack(this,0)" autofocus>
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,2)" onkeydown="tfaBack(this,1)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,3)" onkeydown="tfaBack(this,2)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,4)" onkeydown="tfaBack(this,3)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,5)" onkeydown="tfaBack(this,4)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaSubmitCheck()" onkeydown="tfaBack(this,5)">
+      </div>
+      <button class="btn btn-primary" id="tfaBtn" onclick="verify2FA()" disabled>Verify Code</button>
+      <p style="font-size:0.75rem;color:var(--text-secondary);margin-top:6px">Code: <strong id="tfaDemoCode">------</strong> (demo)</p>
+    </div>
+    <div class="separator">or</div>
+    <button class="btn btn-secondary" style="width:100%" onclick="showRegister()">Create an Account</button>
+    <p class="login-footer"><a onclick="showForgotPassword()">Forgot your password?</a> &middot; Demo: <strong>T1234567890</strong> / pass123</p>
+  </div>
+</div>
+
+<!-- Register -->
+<div id="registerPage" style="display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center">
+  <div class="ken-burns-bg"></div>
+  <div class="login-overlay"></div>
+  <div class="login-card" style="width:480px;max-height:90vh;overflow-y:auto;border-radius:20px">
+    <img class="coat-of-arms" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms" style="width:80px;height:80px">
+    <h1>Create Account</h1>
+    <p class="subtitle">Register for a UGSP account</p>
+    <div id="registerError" class="login-error"></div>
+    <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="e.g. Grace Akello"></div>
+    <div class="form-group"><label>National ID (NIN)</label><input type="text" id="regNin" placeholder="e.g. T1234567890"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="grace@example.com"></div>
+    <div class="form-group"><label>Phone</label><input type="text" id="regPhone" placeholder="+256 700 000 000"></div>
+    <div class="form-group"><label>Category</label><select id="regCategory"><option value="citizen">Citizen</option><option value="business">Business</option><option value="visitor">Visitor</option></select></div>
+    <div class="form-group"><label>Password</label><div class="pw-wrap"><input type="password" id="regPass" placeholder="Create a strong password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('regPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
+    <button class="btn btn-primary" onclick="doRegister()">Create Account</button>
+    <p class="login-footer">Already have an account? <a class="auth-toggle" onclick="hideRegister()">Sign in</a></p>
+  </div>
+</div>
+
+<!-- Forgot Password -->
+<div id="forgotPage" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.6);align-items:center;justify-content:center">
+  <div class="login-card" style="width:420px">
+    <div class="login-logo" style="width:60px;height:60px;font-size:28px;background:var(--gold);color:var(--navy)">&#128274;</div>
+    <h1>Reset Password</h1>
+    <p class="subtitle" id="forgotStep">Step 1: Enter your NIN</p>
+    <div id="forgotError" class="login-error"></div>
+    <div class="form-group" id="forgotNinGroup"><label>National ID (NIN)</label><input type="text" id="forgotNin" placeholder="e.g. T1234567890"></div>
+    <div class="form-group" id="forgotCodeGroup" style="display:none"><label>Reset Code</label><input type="text" id="forgotCode" placeholder="Enter the code sent to you"></div>
+    <div class="form-group" id="forgotNewPassGroup" style="display:none"><label>New Password</label><div class="pw-wrap"><input type="password" id="forgotNewPass" placeholder="Enter new password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('forgotNewPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
+    <button class="btn btn-primary" id="forgotBtn" onclick="forgotStep2()">Send Reset Code</button>
+    <p class="login-footer"><a class="auth-toggle" onclick="hideForgotPassword()">Back to sign in</a></p>
+  </div>
+</div>
+
+<!-- Notif overlay -->
+<div class="notif-overlay" id="notifOverlay" onclick="closeNotifPanel()"></div>
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-header"><h3>Notifications</h3><button class="modal-close" onclick="closeNotifPanel()">&times;</button></div>
+  <div class="notif-panel-body" id="notifBody"><div class="notif-empty"><div class="empty-icon material-icons-round" style="font-size:2rem">notifications_off</div><h4>No notifications</h4></div></div>
+  <div style="padding:10px 20px;border-top:1px solid var(--border)"><button class="btn btn-sm btn-secondary" style="width:100%" onclick="clearNotifs()">Mark all as read</button></div>
+</div>
+
+<!-- App -->
+<div id="appLayout" class="app-layout">
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+    <div class="sidebar-header">
+      <img class="coa-sidebar" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms">
+      <div class="logo-text"><h2>UGSP</h2><small>Government Portal</small></div>
+      <button class="sidebar-collapse material-icons-round" onclick="toggleSidebarCollapse()" title="Collapse sidebar" aria-label="Collapse sidebar">chevron_left</button>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')" aria-current="page"><span class="icon material-icons-round">dashboard</span> Dashboard</button>
+      <button class="nav-item" data-page="services" onclick="navigateTo('services')"><span class="icon material-icons-round">grid_view</span> Services</button>
+      <button class="nav-item" data-page="search" onclick="navigateTo('search')"><span class="icon material-icons-round">search</span> Search</button>
+      <button class="nav-item" data-page="documents" onclick="navigateTo('documents')"><span class="icon material-icons-round">folder</span> Documents</button>
+      <button class="nav-item" data-page="applications" onclick="navigateTo('applications')"><span class="icon material-icons-round">description</span> Applications <span class="badge" id="appBadge">0</span></button>
+      <button class="nav-item" data-page="payments" onclick="navigateTo('payments')"><span class="icon material-icons-round">account_balance_wallet</span> Payments</button>
+      <button class="nav-item" data-page="ministries" onclick="navigateTo('ministries')"><span class="icon material-icons-round">account_balance</span> Ministries</button>
+      <button class="nav-item" data-page="map" onclick="navigateTo('map')"><span class="icon material-icons-round">map</span> Service Map</button>
+      <button class="nav-item" data-page="news" onclick="navigateTo('news')"><span class="icon material-icons-round">newspaper</span> News</button>
+      <button class="nav-item" data-page="help" onclick="navigateTo('help')"><span class="icon material-icons-round">help</span> Help</button>
+      <button class="nav-item" data-page="profile" onclick="navigateTo('profile')"><span class="icon material-icons-round">person</span> Profile</button>
+      <button class="nav-item" data-page="activity" onclick="navigateTo('activity')"><span class="icon material-icons-round">history</span> Activity</button>
+      <button class="nav-item" data-page="about" onclick="navigateTo('about')"><span class="icon material-icons-round">info</span> About</button>
+      <button class="nav-item" data-page="settings" onclick="navigateTo('settings')"><span class="icon material-icons-round">settings</span> Settings</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar" id="userAvatar">G</div><div class="user-details"><div class="user-name" id="userName">Grace Akello</div><div class="user-nin" id="userNin">T1234567890</div></div><button class="logout-btn material-icons-round" onclick="doLogout()" aria-label="Sign out">logout</button></div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main-content">
+    <header class="top-bar">
+      <button class="menu-toggle material-icons-round" onclick="toggleSidebar()" aria-label="Toggle menu">menu</button>
+      <div class="search-bar" role="search"><span class="search-icon material-icons-round">search</span><input type="search" id="quickSearch" placeholder="Search services, ministries..." onkeydown="if(event.key==='Enter')quickSearchGo()" aria-label="Search"></div>
+      <div class="top-bar-right"><button class="notif-btn material-icons-round" onclick="toggleNotifPanel()" aria-label="Notifications" id="notifBtn">notifications<span class="notif-dot" id="notifDot"></span></button></div>
+    </header>
+
+    <!-- Messages float top-right -->
+    <div class="msg msg-success" id="msgSuccess" role="alert"></div>
+    <div class="msg msg-error" id="msgError" role="alert"></div>
+
+    <!-- Feedback FAB -->
+    <button class="feedback-fab material-icons-round" id="feedbackFab" onclick="openFeedback()" title="Send feedback" aria-label="Send feedback" style="display:none">feedback</button>
+
+    <!-- Dashboard -->
+    <div class="page active" id="pageDashboard">
+      <div class="page-header"><h2>Welcome back, <span id="dashName">Citizen</span></h2><p>Your personalized portal for all Government of Uganda services.</p></div>
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="section-header"><h3>Featured Services</h3><button class="btn btn-sm btn-ghost" onclick="navigateTo('services')">View all</button></div>
+      <div class="service-grid" id="featuredServices"></div>
+    </div>
+
+    <!-- Services -->
+    <div class="page" id="pageServices">
+      <div class="page-header"><h2>Service Catalogue</h2><p>Browse all government services across every ministry and agency.</p></div>
+      <div class="cat-tabs" id="catTabs" role="tablist"></div>
+      <div class="service-grid" id="servicesGrid"></div>
+    </div>
+
+    <!-- Search -->
+    <div class="page search-page" id="pageSearch">
+      <div class="page-header"><h2>Uganda Search</h2><p>Search services, ministries, and agencies.</p></div>
+      <div class="search-input-wrap"><input type="text" id="searchInput" placeholder="Search by name, ministry, or keyword..." oninput="doSearch()" aria-label="Search" autofocus></div>
+      <div id="searchResults"></div>
+    </div>
+
+    <!-- Applications -->
+    <div class="page" id="pageApplications">
+      <div class="page-header"><h2>My Applications</h2><p>Track all your submitted applications and their current status.</p></div>
+      <div class="card">
+        <div class="table-wrap"><table role="table" aria-label="Applications"><thead><tr><th>ID</th><th>Service</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody id="appsTableBody"></tbody></table></div>
+        <div class="empty-state" id="appsEmpty"><div class="empty-icon material-icons-round">inbox</div><h4>No applications yet</h4><p>Browse the service catalogue to get started.</p><button class="btn btn-primary" style="margin-top:10px;width:auto" onclick="navigateTo('services')">Browse Services</button></div>
+      </div>
+    </div>
+
+    <!-- Ministries -->
+    <div class="page" id="pageMinistries">
+      <div class="page-header"><h2>Ministries &amp; Agencies</h2><p>Complete directory of all Government of Uganda ministries, authorities, and parastatal organs.</p></div>
+      <div style="margin-bottom:14px"><input type="text" id="ministrySearch" placeholder="Search ministries..." oninput="loadMinistries()" style="width:100%;padding:10px 14px;border-radius:var(--radius-sm);border:2px solid var(--border);font-family:inherit;font-size:0.9rem"></div>
+      <div class="ministry-grid" id="ministryGrid"></div>
+    </div>
+
+    <!-- Map -->
+    <div class="page" id="pageMap">
+      <div class="page-header"><h2>Service Map</h2><p>Interactive map of government service locations across Uganda.</p></div>
+      <div class="card map-wrapper" id="mapWrapper" style="padding:4px;position:relative">
+        <div class="map-controls-wrap">
+          <div class="map-controls">
+            <div class="map-search-wrap"><span class="map-search-icon material-icons-round">search</span><input type="text" id="mapSearch" placeholder="Search locations..." oninput="filterMapMarkers()"></div>
+            <button class="btn-fullscreen" id="fullscreenBtn" onclick="toggleMapFullscreen()"><span class="material-icons-round" style="font-size:1rem">fullscreen</span> Full Screen</button>
+          </div>
+        </div>
+        <div id="mapNotifOverlay" class="map-notif-overlay"></div>
+        <div class="map-container" id="ugandaMap"></div>
+        <div class="map-legend" id="mapLegend">
+          <span class="legend-item"><span class="legend-dot" style="background:#1565c0"></span>Ministry</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#2e7d32"></span>Health</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#e65100"></span>Education</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#7b1fa2"></span>Service Centre</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#c62828"></span>Security</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#c8a84e"></span>Financial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div class="page" id="pageProfile">
+      <div class="page-header"><h2>My Profile</h2><p>Your UGPass identity and account details.</p></div>
+      <div class="card" style="max-width:520px">
+        <div class="photo-upload-wrap">
+          <div class="photo-preview" id="photoPreview"><span class="material-icons-round" style="font-size:2rem">person</span></div>
+          <div><h3 style="font-weight:600" id="profileName">&mdash;</h3><p style="font-size:0.85rem;color:var(--text-secondary)" id="profileEmail">&mdash;</p><div class="upload-btn-wrapper" style="margin-top:8px"><button class="btn btn-sm btn-secondary">Upload Photo</button><input type="file" accept="image/jpeg" onchange="uploadPhoto(this)"></div></div>
+        </div>
+        <div class="form-group"><label>National ID (NIN)</label><input type="text" id="profileNin" disabled></div>
+        <div class="form-group"><label>Phone</label><input type="text" id="profilePhone" disabled></div>
+        <div class="form-group"><label>Nationality</label><input type="text" id="profileNationality" disabled></div>
+        <div class="form-group"><label>Category</label><input type="text" id="profileCategory" disabled></div>
+        <div class="form-group"><label>Verification Status</label><input type="text" id="profileVerified" disabled style="color:var(--success)"></div>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="page" id="pageDocuments">
+      <div class="page-header"><h2 data-i18n="nav.documents">Document Wallet</h2><p data-i18n="pages.documents.subtitle">Your digital documents from all government agencies in one place.</p></div>
+      <div id="docStats" style="display:flex;gap:12px;margin-bottom:18px"></div>
+      <div class="page-2col">
+        <div>
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-primary" onclick="loadDocuments()"><span class="material-icons-round" style="font-size:16px">refresh</span> Refresh</button>
+          </div>
+          <div id="docGrid"></div>
+        </div>
+        <div>
+          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">info</span> About Document Wallet</h4><p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">Your Document Wallet stores all official documents issued to you by Government of Uganda agencies. This includes National IDs, Passports, Certificates, Permits, and Official Receipts.</p><p style="font-size:0.82rem;color:var(--text-secondary);margin-top:8px;line-height:1.6"><strong>Data Protection:</strong> Your documents are stored securely in compliance with the DPPA 2019.</p></div>
+          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">download</span> Download</h4><p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">Click the download icon on any document to save it as a PDF. Downloaded documents include a QR verification code for authenticity.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payments -->
+    <div class="page" id="pagePayments">
+      <div class="page-header"><h2 data-i18n="nav.payments">Payment History</h2><p data-i18n="pages.payments.subtitle">View all your payments, receipts, and transaction history.</p></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-primary" onclick="loadPayments()"><span class="material-icons-round" style="font-size:16px">refresh</span> Refresh</button>
+      </div>
+      <div id="payStats" style="display:flex;gap:12px;margin-bottom:16px"></div>
+      <div id="payList"></div>
+      <div class="empty-state" id="payEmpty" style="display:none"><div class="empty-icon material-icons-round">account_balance_wallet</div><h4>No payments yet</h4><p>Your payment transactions will appear here once you make a payment.</p></div>
+    </div>
+
+    <!-- News -->
+    <div class="page" id="pageNews">
+      <div class="page-header"><h2 data-i18n="nav.news">News & Announcements</h2><p data-i18n="pages.news.subtitle">Latest updates from Government of Uganda agencies and services.</p></div>
+      <div id="newsList"></div>
+    </div>
+
+    <!-- Help / FAQ -->
+    <div class="page" id="pageHelp">
+      <div class="page-header"><h2 data-i18n="nav.help">Help Center</h2><p data-i18n="pages.help.subtitle">Find answers to common questions about using UGSP.</p></div>
+      <div class="help-search"><span class="hs-icon material-icons-round">search</span><input type="text" id="helpSearchInput" placeholder="Search FAQ..." oninput="filterHelp()"></div>
+      <div id="helpContent"></div>
+    </div>
+
+    <!-- Settings -->
+    <div class="page" id="pageSettings">
+      <div class="page-header"><h2 data-i18n="nav.settings">Settings</h2><p data-i18n="pages.settings.subtitle">Manage your account settings and preferences.</p></div>
+      <div class="page-2col">
+        <div>
+          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">lock</span> Change Password</h4><div class="form-group"><label>Current Password</label><div class="pw-wrap"><input type="password" id="setCurPass" placeholder="Current password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setCurPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><div class="form-group"><label>New Password</label><div class="pw-wrap"><input type="password" id="setNewPass" placeholder="New password (min 6 chars)"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setNewPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><div class="form-group"><label>Confirm New Password</label><div class="pw-wrap"><input type="password" id="setConfirmPass" placeholder="Confirm new password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setConfirmPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><button class="btn btn-primary" onclick="changePassword()" style="width:auto">Update Password</button><p id="setPassMsg" class="login-error" style="margin-top:6px"></p></div>
+          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">palette</span> Appearance</h4><div class="settings-row"><div><div class="sl-label">Language</div><div class="sl-desc">Choose your preferred language</div></div><select id="setLang" onchange="setLanguage(this.value)" style="padding:6px 10px;border:2px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.82rem"><option value="en">English</option><option value="lug">Luganda</option><option value="swa">Swahili</option><option value="luo">Luo (Acholi)</option><option value="nyk">Runyankole</option></select></div></div>
+          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">notifications</span> Notifications</h4><div class="settings-row"><div><div class="sl-label">Email Notifications</div><div class="sl-desc">Receive updates about your applications via email</div></div><label class="toggle"><input type="checkbox" checked id="setEmailNotif" onchange="savePrefs()"><span class="toggle-slider"></span></label></div><div class="settings-row"><div><div class="sl-label">SMS Notifications</div><div class="sl-desc">Receive SMS alerts for payment confirmations</div></div><label class="toggle"><input type="checkbox" checked id="setSmsNotif" onchange="savePrefs()"><span class="toggle-slider"></span></label></div></div>
+        </div>
+        <div>
+          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">security</span> Security</h4><p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6">Two-Factor Authentication (2FA) is enabled on your account. Each time you log in, a 6-digit verification code is required.</p><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><span class="doc-badge active" style="font-size:0.78rem;padding:4px 14px"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">check_circle</span> 2FA Active</span><span class="doc-badge active" style="font-size:0.78rem;padding:4px 14px"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">check_circle</span> Session Encryption</span></div></div>
+          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">history</span> Recent Activity</h4><div id="settingsActivity"><p style="font-size:0.82rem;color:var(--text-secondary)">Loading...</p></div><button class="btn btn-sm btn-ghost" onclick="navigateTo('activity')" style="margin-top:8px">View full activity log</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="page" id="pageActivity">
+      <div class="page-header"><h2 data-i18n="nav.activity">Activity Log</h2><p data-i18n="pages.activity.subtitle">A record of all actions taken on your account. Full transparency as required by DPPA 2019.</p></div>
+      <div id="activityList"></div>
+    </div>
+
+    <!-- About -->
+    <div class="page" id="pageAbout">
+      <div class="page-header"><h2 data-i18n="nav.about">About UGSP</h2><p data-i18n="pages.about.subtitle">Learn about the Unified Government Service Portal.</p></div>
+      <div id="aboutContent"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal-overlay" id="feedbackModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle" style="width:440px"><div class="modal-header"><h3 id="feedbackTitle">Send Feedback</h3><button class="modal-close material-icons-round" onclick="closeModal('feedbackModal')" aria-label="Close">close</button></div><div class="modal-body">
+  <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px">Help us improve the UGSP. Your feedback is valuable.</p>
+  <div style="margin-bottom:12px"><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:4px">Category</label><select id="feedbackCategory" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem"><option value="general">General Feedback</option><option value="bug">Bug Report</option><option value="feature">Feature Request</option><option value="service">Service Issue</option><option value="accessibility">Accessibility</option></select></div>
+  <div style="margin-bottom:10px"><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:4px">Rating</label><div class="feedback-rating" id="feedbackRating">${[1,2,3,4,5].map(i => `<span class="feedback-star material-icons-round" data-star="${i}" onclick="setFeedbackRating(${i})">star</span>`).join('')}</div></div>
+  <div><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:4px">Your Message</label><textarea id="feedbackMessage" rows="4" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;resize:vertical" placeholder="Describe your experience or suggestion..."></textarea></div>
+  <div style="margin-top:4px;font-size:0.72rem;color:var(--text-secondary)">All feedback is anonymous unless you provide contact details.</div>
+</div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('feedbackModal')">Cancel</button><button class="btn btn-primary" onclick="submitFeedback()">Submit Feedback</button></div></div></div>
+
+<!-- Service Modal -->
+<div class="modal-overlay" id="serviceModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><h3 id="modalTitle">Service Details</h3><button class="modal-close material-icons-round" onclick="closeModal('serviceModal')" aria-label="Close">close</button></div><div class="modal-body" id="serviceModalBody"></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('serviceModal')">Cancel</button><button class="btn btn-primary" id="applyBtn" onclick="applyService()">Apply Now</button></div></div></div>
+
+<!-- Cart Modal -->
+<div class="modal-overlay" id="cartModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="cartTitle"><div class="modal-header"><h3 id="cartTitle">Checkout</h3><button class="modal-close material-icons-round" onclick="closeModal('cartModal')" aria-label="Close">close</button></div><div class="modal-body"><div class="checkout-summary" id="checkoutSummary"></div><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:8px">Payment Channel</label><div class="payment-channels"><label class="pay-channel selected"><input type="radio" name="channel" value="mobile_money" checked><span class="chan-label">Mobile Money</span></label><label class="pay-channel"><input type="radio" name="channel" value="card"><span class="chan-label">Card Payment</span></label><label class="pay-channel"><input type="radio" name="channel" value="bank"><span class="chan-label">Bank Transfer</span></label></div><div id="prnContainer"></div></div><div class="modal-footer" id="cartFooter"><button class="btn btn-secondary" onclick="closeModal('cartModal')">Close</button><button class="btn btn-success" id="checkoutBtn" onclick="doCheckout()">Generate PRN</button></div></div></div>
+
+<script>
+// ===== STATE =====
+const STATE = { token: null, user: null, currentCategory: 'all', cartItems: [], notifHistory: [], map: null };
+const CATEGORIES = ['all','citizen','business','visitor','health','education'];
+
+// ===== MULTI-LANGUAGE =====
+const LANG = {
+  en: {
+    'nav.dashboard':'Dashboard','nav.services':'Services','nav.search':'Search','nav.documents':'Documents','nav.applications':'Applications','nav.payments':'Payments','nav.ministries':'Ministries','nav.map':'Service Map','nav.news':'News','nav.help':'Help','nav.profile':'Profile','nav.activity':'Activity','nav.about':'About','nav.settings':'Settings',
+    'pages.documents.subtitle':'Your digital documents from all government agencies in one place.',
+    'pages.payments.subtitle':'View all your payments, receipts, and transaction history.',
+    'pages.news.subtitle':'Latest updates from Government of Uganda agencies and services.',
+    'pages.help.subtitle':'Find answers to common questions about using UGSP.',
+    'pages.settings.subtitle':'Manage your account settings and preferences.',
+    'pages.activity.subtitle':'A record of all actions taken on your account. Full transparency as required by DPPA 2019.',
+    'pages.about.subtitle':'Learn about the Unified Government Service Portal.',
+  },
+  lug: {
+    'nav.dashboard':'Dduundiro','nav.services':'Eweereza','nav.search':'Okunoonya','nav.documents':'Ebiwandiiko','nav.applications':'Okusaba','nav.payments':'Okusasula','nav.ministries':'B Minisitule','nav.map':'Mappa ya Weereza','nav.news':'Amawulire','nav.help':'Obuyambi','nav.profile':'Pulofaayo','nav.activity':'Ebyakoledwa','nav.about':'Kubikwata','nav.settings':'Enteeka',
+    'pages.documents.subtitle':'Ebiwandiiko byo ebya digitaali okuva mu gavumenti yonna mu kifo kimu.',
+    'pages.payments.subtitle':'Laba okusasula kwo kwonna, obukakafu, n\'ebyafaayo.',
+    'pages.news.subtitle':'Amawulire ag\'oluvanyuma okuva mu gavumenti za Uganda.',
+    'pages.help.subtitle':'Funnye ebibuuzo ebikwata ku kukozesa UGSP.',
+    'pages.settings.subtitle':'Kwasaanja enteeka za akaawunti yo n\'eby\'okwagala.',
+    'pages.activity.subtitle':'Endagiriro y\'ebikolwa byonna ku kaawunti yo nga bwe kiteekebwa mu DPPA 2019.',
+    'pages.about.subtitle':'Manyira ku Unified Government Service Portal.',
+  },
+  swa: {
+    'nav.dashboard':'Dashibodi','nav.services':'Huduma','nav.search':'Tafuta','nav.documents':'Nyaraka','nav.applications':'Maombi','nav.payments':'Malipo','nav.ministries':'Wizara','nav.map':'Ramani ya Huduma','nav.news':'Habari','nav.help':'Msaada','nav.profile':'Wasifu','nav.activity':'Shughuli','nav.about':'Kuhusu','nav.settings':'Mipangilio',
+    'pages.documents.subtitle':'Nyaraka zako za kidijitali kutoka kwa mashirika yote ya serikali mahali pamoja.',
+    'pages.payments.subtitle':'Tazama malipo yako yote, risiti, na historia ya miamala.',
+    'pages.news.subtitle':'Habari mpya kutoka kwa mashirika ya serikali ya Uganda.',
+    'pages.help.subtitle':'Pata majibu ya maswali ya kawaida kuhusu kutumia UGSP.',
+    'pages.settings.subtitle':'Dhibiti mipangilio ya akaunti yako na mapendeleo.',
+    'pages.activity.subtitle':'Rekodi ya vitendo vyote kwenye akaunti yako. Uwazi kamili kama inavyotakiwa na DPPA 2019.',
+    'pages.about.subtitle':'Jifunze kuhusu Unified Government Service Portal.',
+  },
+  luo: {
+    'nav.dashboard':'Dashboard','nav.services':'Tich','nav.search':'Manyi','nav.documents':'Gik mipira','nav.applications':'Kwayo','nav.payments':'Chulo','nav.ministries':'Jodongo','nav.map':'Map mar Tich','nav.news':'Ngesi','nav.help':'Kony','nav.profile':'Nying','nav.activity':'Timo','nav.about':'Kuom','nav.settings':'Yubo',
+    'pages.documents.subtitle':'Gik mipira mari ma digital koa e ministere duto mag gwamani kamoro.',
+    'pages.payments.subtitle':'Ne chulo mari duto, risaiti kod gik motimore.',
+    'pages.news.subtitle':'Ngesi manyien koa e ministere mag gwamani Uganda.',
+    'pages.help.subtitle':'Yudo dwoko ni penjo ma ji penjo e yo mar tiyo gi UGSP.',
+    'pages.settings.subtitle':'Yubo akawunti mari gi gik ma ihero.',
+    'pages.activity.subtitle':'Gik motimore duto e akawunti mari. Ti isiso ma ochung\'ne DPPA 2019.',
+    'pages.about.subtitle':'Ng\'eyo kuom Unified Government Service Portal.',
+  },
+  nyk: {
+    'nav.dashboard':'Ekibanja','nav.services':'Eby\'okukora','nav.search':'Kushakisha','nav.documents':'Ebyahandiikwe','nav.applications':'Okushaba','nav.payments':'Okushashura','nav.ministries':'Ba Minisitule','nav.map':'Ekarata y\'Eby\'okukora','nav.news':'Amakuru','nav.help':'Obuhweza','nav.profile':'Ebikukwata','nav.activity':'Ebyakoreirwe','nav.about':'Ku','nav.settings':'Enteekateeka',
+    'pages.documents.subtitle':'Ebyahandiikwe byawe omu digital okuva omu gavumenti yoona omu kifo kimwe.',
+    'pages.payments.subtitle':'Reeba okushashura kwawe kwona, risiti, n\'ebikorwa by\'eby\'enshorooza.',
+    'pages.news.subtitle':'Amakuru mashasha okuva omu gavumenti ya Uganda.',
+    'pages.help.subtitle':'Shanga ebihangirizo by\'ebibuuzo ebikwata ku kukozesa UGSP.',
+    'pages.settings.subtitle':'Gambe enteekateeka z\'akaawunti yawe n\'ebikonererwa.',
+    'pages.activity.subtitle':'Kahanda k\'ebikorwa byona omu kaawunti yawe. Kwehangaaza buhingwa nga DPPA 2019 bukushwijja.',
+    'pages.about.subtitle':'Iga ku Unified Government Service Portal.',
+  },
+};
+function tr(key) { const lang = localStorage.getItem('ugsp_lang') || 'en'; return LANG[lang]?.[key] || LANG['en']?.[key] || key; }
+function setLanguage(lang) {
+  localStorage.setItem('ugsp_lang', lang);
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = tr(key);
+  });
+}
+(function() { const saved = localStorage.getItem('ugsp_lang'); if (saved) setLanguage(saved); })();
+
+// ===== API =====
+async function api(method, path, body) {
+  const opts = { method, headers: {} };
+  if (STATE.token) opts.headers['Authorization'] = `Bearer ${STATE.token}`;
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const r = await fetch(path, opts);
+  if (!r.ok) { const e = await r.json().catch(()=>({detail:r.statusText})); throw new Error(e.detail||'Request failed'); }
+  return r.json();
+}
+
+// ===== NOTIFICATIONS =====
+function showMsg(type, text, appData) {
+  const el = type === 'success' ? document.getElementById('msgSuccess') : document.getElementById('msgError');
+  el.textContent = text; el.classList.add('show');
+  const id = setTimeout(() => { el.classList.remove('show'); }, 2000);
+  // Add to notification history
+  STATE.notifHistory.push({ type, text, time: new Date(), appData });
+  updateNotifDot();
+  // Also show on map if map page is active
+  if (document.getElementById('pageMap').classList.contains('active')) {
+    showMapNotif(text, type);
+  }
+}
+function updateNotifDot() {
+  const dot = document.getElementById('notifDot');
+  dot.style.display = STATE.notifHistory.length > 0 ? 'block' : 'none';
+}
+function toggleNotifPanel() {
+  const panel = document.getElementById('notifPanel');
+  const overlay = document.getElementById('notifOverlay');
+  const open = !panel.classList.contains('open');
+  panel.classList.toggle('open', open);
+  overlay.classList.toggle('active', open);
+  if (open) renderNotifs();
+}
+function closeNotifPanel() {
+  document.getElementById('notifPanel').classList.remove('open');
+  document.getElementById('notifOverlay').classList.remove('active');
+}
+const NOTIF_ICONS = { 'National ID':'badge','Passport':'flight','Driving':'directions_car','Business':'business','Tax':'payments','Medical':'local_hospital','School':'school','Visa':'how_to_vote','Permit':'assignment','Birth':'child_care','Marriage':'favorite','Death':'bedtime','Land':'home','Water':'water_drop','Forest':'forest','Loan':'savings','Vaccine':'vaccines','success':'check_circle','error':'error' };
+function getNotifIcon(text, type) {
+  for (const [kw, icon] of Object.entries(NOTIF_ICONS)) { if (text.includes(kw)) return icon; }
+  return type === 'success' ? 'check_circle' : 'error';
+}
+function renderNotifs() {
+  const body = document.getElementById('notifBody');
+  if (STATE.notifHistory.length === 0) {
+    body.innerHTML = '<div class="notif-empty"><div class="empty-icon material-icons-round" style="font-size:2rem">notifications_off</div><h4>No notifications</h4><p>No recent activity to show.</p></div>';
+    return;
+  }
+  body.innerHTML = STATE.notifHistory.map((n, i) => {
+    const ico = getNotifIcon(n.text, n.type);
+    const canClick = n.appData && n.appData.applicationId;
+    const isProgress = n.text.includes('submitted') || n.text.includes('In Progress');
+    const clickHandler = canClick ? `onclick="showNotifAppDetail(${i})"` : '';
+    return `<div class="notif-item ${canClick ? 'clickable' : ''}" ${clickHandler} tabindex="${canClick ? '0' : '-1'}" role="${canClick ? 'button' : ''}">
+      <span class="notif-icon material-icons-round" style="color:${n.type==='success'?'var(--success)':'var(--error)'}">${ico}</span>
+      <div style="flex:1"><div class="${canClick ? 'notif-title' : ''}">${n.text}</div><span style="font-size:0.72rem;color:var(--text-secondary)">${n.time.toLocaleTimeString()}</span>
+      ${canClick ? '<br><span style="font-size:0.7rem;color:var(--steel)">Click to view details</span>' : ''}</div></div>`;
+  }).reverse().join('');
+}
+function showNotifAppDetail(idx) {
+  const n = STATE.notifHistory[idx];
+  if (!n || !n.appData) return;
+  closeNotifPanel();
+  navigateTo('applications');
+  showMsg('info', n.text + (n.appData.applicationId ? ' (App #' + n.appData.applicationId + ')' : ''));
+}
+function clearNotifs() {
+  STATE.notifHistory = []; updateNotifDot(); renderNotifs();
+}
+
+// ===== PASSWORD TOGGLE =====
+function togglePw(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  const isPw = inp.type === 'password';
+  inp.type = isPw ? 'text' : 'password';
+  btn.textContent = isPw ? 'visibility' : 'visibility_off';
+  btn.setAttribute('aria-label', isPw ? 'Hide password' : 'Show password');
+}
+
+// ===== SIDEBAR AVATAR =====
+function updateSidebarAvatar(user) {
+  const el = document.getElementById('userAvatar');
+  if (user.photo_url) {
+    el.innerHTML = `<img src="${user.photo_url}?t=${Date.now()}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">`;
+  } else {
+    el.textContent = user.name.charAt(0).toUpperCase();
+  }
+}
+
+// ===== 2FA =====
+let tfaPendingToken = null;
+function doLogin() {
+  const nin = document.getElementById('loginNin').value.trim();
+  const pw = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError'); errEl.textContent = '';
+  document.getElementById('loginBtn').disabled = true;
+  api('POST', '/auth/login', { nin, password: pw })
+    .then(d => {
+      // Simulate 2FA — store token and show 2FA step
+      tfaPendingToken = d.token;
+      STATE.user = d;
+      document.getElementById('loginBtn').style.display = 'none';
+      document.querySelector('.separator').style.display = 'none';
+      document.querySelector('[onclick="showRegister()"]').style.display = 'none';
+      document.getElementById('tfaSection').classList.add('active');
+      document.getElementById('tfaInputs').querySelector('input').focus();
+      document.getElementById('tfaDemoCode').textContent = d.demo_2fa_code || '123456';
+      showMsg('success','Verification code sent to your registered device');
+    })
+    .catch(e => { errEl.textContent = e.message; })
+    .finally(() => { document.getElementById('loginBtn').disabled = false; });
+}
+function tfaMove(el, next) {
+  el.value = el.value.replace(/[^0-9]/g,'');
+  if (el.value && next < 6) document.querySelectorAll('#tfaInputs input')[next].focus();
+}
+function tfaBack(el, prev) {
+  if (el.value === '' && event.key === 'Backspace' && prev >= 0) document.querySelectorAll('#tfaInputs input')[prev].focus();
+}
+function tfaSubmitCheck() {
+  const vals = Array.from(document.querySelectorAll('#tfaInputs input')).map(i => i.value).join('');
+  document.getElementById('tfaBtn').disabled = vals.length !== 6;
+}
+async function verify2FA() {
+  const vals = Array.from(document.querySelectorAll('#tfaInputs input')).map(i => i.value).join('');
+  if (vals.length !== 6) { showMsg('error','Please enter the 6-digit code'); return; }
+  try {
+    const d = await api('POST','/auth/verify-2fa',{nin: STATE.user.nin, code: vals});
+    STATE.token = d.token;
+    STATE.user = d;
+    localStorage.setItem('ugsp_token', d.token);
+    localStorage.setItem('ugsp_user', JSON.stringify(d));
+    enterApp();
+  } catch(e) {
+    showMsg('error',e.message);
+    document.querySelectorAll('#tfaInputs input').forEach(i => i.value = '');
+    document.getElementById('tfaBtn').disabled = true;
+  }
+}
+function enterApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('registerPage').style.display = 'none';
+  document.getElementById('forgotPage').style.display = 'none';
+  document.getElementById('appLayout').classList.add('active');
+  document.getElementById('userName').textContent = STATE.user.name;
+  document.getElementById('userNin').textContent = STATE.user.nin;
+  updateSidebarAvatar(STATE.user);
+  document.getElementById('dashName').textContent = STATE.user.name.split(' ')[0];
+  document.getElementById('feedbackFab').style.display = 'flex';
+  loadDashboard(); loadServices(); loadApplications(); loadProfile(); loadMinistries();
+  loadDocuments(); loadPayments(); loadNews(); loadHelp(); loadSettingsActivity(); loadAbout();
+}
+function doLogout() {
+  STATE.token = null; STATE.user = null; STATE.notifHistory = []; tfaPendingToken = null;
+  localStorage.removeItem('ugsp_token'); localStorage.removeItem('ugsp_user');
+  document.getElementById('tfaSection').classList.remove('active');
+  document.getElementById('loginBtn').style.display = 'inline-flex';
+  document.querySelector('.separator').style.display = 'flex';
+  document.querySelector('[onclick="showRegister()"]').style.display = 'inline-flex';
+  document.querySelectorAll('#tfaInputs input').forEach(i => i.value = '');
+  document.getElementById('tfaBtn').disabled = true;
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('registerPage').style.display = 'none';
+  document.getElementById('forgotPage').style.display = 'none';
+  document.getElementById('appLayout').classList.remove('active');
+  document.getElementById('feedbackFab').style.display = 'none';
+  document.getElementById('loginNin').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('loginError').textContent = '';
+}
+(function() { const t=localStorage.getItem('ugsp_token'),u=localStorage.getItem('ugsp_user'); if(t&&u){ STATE.token=t; STATE.user=JSON.parse(u); enterApp(); } })();
+
+// ===== REGISTER =====
+function showRegister() { document.getElementById('registerPage').style.display='flex'; document.getElementById('loginPage').style.display='none'; document.getElementById('registerError').textContent=''; }
+function hideRegister() { document.getElementById('registerPage').style.display='none'; document.getElementById('loginPage').style.display='flex'; }
+async function doRegister() {
+  const errEl = document.getElementById('registerError'); errEl.textContent='';
+  const body = { nin: document.getElementById('regNin').value.trim(), name: document.getElementById('regName').value.trim(), email: document.getElementById('regEmail').value.trim(), phone: document.getElementById('regPhone').value.trim(), category: document.getElementById('regCategory').value, password: document.getElementById('regPass').value };
+  try {
+    const d = await api('POST','/auth/register',body);
+    STATE.token = d.token; STATE.user = d;
+    localStorage.setItem('ugsp_token',d.token); localStorage.setItem('ugsp_user',JSON.stringify(d));
+    showMsg('success','Account created! Welcome to UGSP.');
+    enterApp();
+  } catch(e) { errEl.textContent = e.message; }
+}
+
+// ===== FORGOT PASSWORD =====
+let forgotStep = 1;
+function showForgotPassword() { forgotStep=1; document.getElementById('forgotPage').style.display='flex'; document.getElementById('loginPage').style.display='none'; document.getElementById('forgotError').textContent=''; document.getElementById('forgotStep').textContent='Step 1: Enter your NIN'; document.getElementById('forgotNinGroup').style.display='block'; document.getElementById('forgotCodeGroup').style.display='none'; document.getElementById('forgotNewPassGroup').style.display='none'; document.getElementById('forgotBtn').textContent='Send Reset Code'; document.getElementById('forgotBtn').onclick=forgotStep2; }
+function hideForgotPassword() { document.getElementById('forgotPage').style.display='none'; document.getElementById('loginPage').style.display='flex'; }
+async function forgotStep2() {
+  const errEl = document.getElementById('forgotError'); errEl.textContent='';
+  if (forgotStep===1) {
+    const nin = document.getElementById('forgotNin').value.trim();
+    try {
+      const d = await api('POST','/auth/forgot-password',{nin});
+      showMsg('success',d.message);
+      forgotStep=2; document.getElementById('forgotStep').textContent='Step 2: Enter reset code';
+      document.getElementById('forgotCodeGroup').style.display='block'; document.getElementById('forgotBtn').textContent='Reset Password'; document.getElementById('forgotBtn').onclick=forgotStep2;
+    } catch(e) { errEl.textContent=e.message; }
+  } else if (forgotStep===2) {
+    document.getElementById('forgotNewPassGroup').style.display='block'; forgotStep=3; document.getElementById('forgotStep').textContent='Step 3: Set new password'; document.getElementById('forgotBtn').textContent='Confirm Reset'; document.getElementById('forgotBtn').onclick=forgotStep3;
+  }
+}
+async function forgotStep3() {
+  const errEl = document.getElementById('forgotError'); errEl.textContent='';
+  const nin = document.getElementById('forgotNin').value.trim();
+  const code = document.getElementById('forgotCode').value.trim();
+  const np = document.getElementById('forgotNewPass').value;
+  try {
+    await api('POST','/auth/reset-password',{nin,reset_code:code,new_password:np});
+    showMsg('success','Password reset successfully! Sign in.');
+    hideForgotPassword();
+  } catch(e) { errEl.textContent=e.message; }
+}
+
+// ===== NAVIGATION =====
+function navigateTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1));
+  if (pg) pg.classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (nav) nav.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  if (page === 'map') setTimeout(initMap, 200);
+  if (page === 'documents') loadDocuments();
+  if (page === 'payments') loadPayments();
+  if (page === 'news') loadNews();
+  if (page === 'help') loadHelp();
+  if (page === 'activity') loadActivity();
+  if (page === 'about') loadAbout();
+  if (page === 'settings') loadSettingsActivity();
+}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function toggleSidebarCollapse() {
+  const layout = document.getElementById('appLayout');
+  const btn = document.querySelector('.sidebar-collapse');
+  const collapsed = layout.classList.toggle('sidebar-collapsed');
+  btn.classList.toggle('collapsed', collapsed);
+  btn.title = collapsed ? 'Show sidebar' : 'Collapse sidebar';
+}
+
+// ===== MODAL =====
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ===== DASHBOARD =====
+async function loadDashboard() {
+  try {
+    const [apps, cats] = await Promise.all([api('GET','/applications'), api('GET','/catalogue')]);
+    const approved = apps.filter(a=>a.status==='approved').length;
+    const pending = apps.filter(a=>a.status==='submitted'||a.status==='under_review').length;
+    const stats = [
+      { icon:'grid_view', color:'#e3f2fd', iconBg:'#1565c0', value:cats.length, label:'Available Services', page:'services' },
+      { icon:'description', color:'#e8f5e9', iconBg:'#2e7d32', value:apps.length, label:'My Applications', page:'applications' },
+      { icon:'check_circle', color:'#fff3e0', iconBg:'#e65100', value:approved, label:'Approved' },
+      { icon:'pending', color:'#f3e5f5', iconBg:'#7b1fa2', value:pending, label:'In Progress' },
+    ];
+    document.getElementById('statGrid').innerHTML = stats.map((s,i) => {
+      const clickable = s.page ? `onclick="navigateTo('${s.page}')" style="cursor:pointer"` : '';
+      return `<div class="card stat-card stat-click" ${clickable}><div class="stat-icon" style="background:${s.color};color:${s.iconBg}"><span class="material-icons-round">${s.icon}</span></div><div class="stat-value">${s.value}</div><div class="stat-label">${s.label}</div></div>`;
+    }).join('');
+    document.getElementById('featuredServices').innerHTML = cats.slice(0,4).map(s => renderServiceCard(s)).join('');
+  } catch(e) { showMsg('error','Failed to load dashboard'); }
+}
+
+// ===== SERVICES =====
+async function loadServices(cat) {
+  const q = cat && cat !== 'all' ? `?category=${cat}` : '';
+  try { renderServices(await api('GET','/catalogue'+q)); } catch(e) { showMsg('error','Failed to load services'); }
+}
+function renderServices(data) {
+  const grid = document.getElementById('servicesGrid');
+  if (!data.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">search_off</div><h4>No services found</h4></div>'; return; }
+  grid.innerHTML = data.map(s => renderServiceCard(s)).join('');
+}
+function renderServiceCard(s) {
+  const colors = ['#e3f2fd','#e8f5e9','#fff3e0','#fce4ec','#f3e5f5','#e0f7fa','#fbe9e7','#e8eaf6'];
+  const ics = ['description','badge','business','receipt','directions_car','flight','real_estate_agent','favorite','work','child_care','store','verified_user','how_to_vote','savings','local_hospital','forest','home','vaccines','assignment','school','account_balance','kindergarten','paid','account_balance_wallet','park','volume_up','water_drop'];
+  const c = colors[s.id % colors.length], ic = ics[(s.id-1) % ics.length];
+  const ft = s.fee === 0 ? '<span class="fee free">FREE</span>' : `<span class="fee">UGX ${s.fee.toLocaleString()}</span>`;
+  const ics2 = ['#1565c0','#2e7d32','#e65100','#c62828','#7b1fa2','#00838f','#d84315','#283593'];
+  return `<div class="service-card" onclick="showServiceDetail(${s.id})" tabindex="0" role="button" aria-label="${s.name}"><div class="srv-icon" style="background:${c};color:${ics2[s.id%ics2.length]}"><span class="material-icons-round">${ic}</span></div><h4>${s.name}</h4><div class="ministry">${s.ministry}</div><p>${s.description}</p><div class="foot">${ft}<span style="font-size:0.75rem;color:var(--text-secondary)">${s.turnaround_days}d</span></div></div>`;
+}
+function initCategoryTabs() {
+  document.getElementById('catTabs').innerHTML = CATEGORIES.map(c => `<button class="cat-tab ${c==='all'?'active':''}" role="tab" aria-selected="${c==='all'}" onclick="switchCategory('${c}')">${c.charAt(0).toUpperCase()+c.slice(1)}</button>`).join('');
+}
+function switchCategory(cat) {
+  STATE.currentCategory = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => { t.classList.toggle('active', t.textContent.toLowerCase()===cat); t.setAttribute('aria-selected', t.textContent.toLowerCase()===cat); });
+  loadServices(cat);
+}
+
+// ===== SERVICE DETAIL =====
+let selectedService = null;
+async function showServiceDetail(id) {
+  try {
+    const s = await api('GET',`/catalogue/${id}`); selectedService = s;
+    document.getElementById('modalTitle').textContent = s.name;
+    const reqs = s.requirements?.length ? `<div style="margin-top:10px"><strong>Requirements:</strong><ul style="margin:6px 0 0 16px">${s.requirements.map(r=>`<li style="font-size:0.82rem">${r}</li>`).join('')}</ul></div>` : '';
+    document.getElementById('serviceModalBody').innerHTML = `<div class="ministry" style="font-size:0.82rem;color:var(--steel);font-weight:500;margin-bottom:6px">${s.ministry}</div><p style="font-size:0.88rem;line-height:1.6">${s.description}</p><div style="margin-top:10px;display:flex;gap:20px;font-size:0.85rem"><div><strong>Fee:</strong> ${s.fee===0?'FREE':'UGX '+s.fee.toLocaleString()}</div><div><strong>Turnaround:</strong> ${s.turnaround_days} days</div></div>${reqs}`;
+    document.getElementById('applyBtn').textContent = s.fee > 0 ? 'Add to Cart & Pay' : 'Apply Now';
+    openModal('serviceModal');
+  } catch(e) { showMsg('error','Could not load service details'); }
+}
+async function applyService() {
+  if (!selectedService) return; closeModal('serviceModal');
+  try {
+    const r = await api('POST','/applications',{service_id:selectedService.id,metadata:{}});
+    STATE.cartItems.push({service:selectedService,applicationId:r.application_id});
+    showMsg('success',`${selectedService.name} submitted!`, { applicationId: r.application_id, serviceName: selectedService.name });
+    if (selectedService.fee > 0) openCheckout(selectedService);
+    loadApplications(); loadDashboard();
+  } catch(e) { showMsg('error',e.message); }
+}
+
+// ===== CHECKOUT =====
+function openCheckout(service) {
+  document.getElementById('checkoutSummary').innerHTML = `<div class="checkout-row"><span>${service.name}</span><span>UGX ${service.fee.toLocaleString()}</span></div><div class="checkout-row total"><span>Total</span><span>UGX ${service.fee.toLocaleString()}</span></div>`;
+  document.getElementById('prnContainer').innerHTML = ''; document.getElementById('cartFooter').style.display = 'flex'; document.getElementById('checkoutBtn').style.display = 'inline-flex';
+  openModal('cartModal');
+}
+async function doCheckout() {
+  if (!selectedService) return;
+  const channel = document.querySelector('input[name="channel"]:checked')?.value || 'mobile_money';
+  document.getElementById('checkoutBtn').disabled = true;
+  try {
+    const r = await api('POST','/payments/checkout',{service_id:selectedService.id,amount:selectedService.fee,channel});
+    document.getElementById('checkoutBtn').style.display = 'none';
+    document.getElementById('prnContainer').innerHTML = `<div class="prn-box"><div class="prn-label">Payment Reference Number</div><div class="prn-value">${r.prn}</div><div class="prn-note">UGX ${r.amount.toLocaleString()} via ${channel.replace(/_/g,' ')}</div></div>`;
+    showMsg('success',`PRN generated: ${r.prn}`, { applicationId: STATE.cartItems.length > 0 ? STATE.cartItems[STATE.cartItems.length-1].applicationId : null });
+  } catch(e) { showMsg('error',e.message); } finally { document.getElementById('checkoutBtn').disabled = false; }
+}
+
+// ===== APPLICATIONS =====
+async function loadApplications() {
+  try {
+    const data = await api('GET','/applications');
+    const tbody = document.getElementById('appsTableBody'); const empty = document.getElementById('appsEmpty');
+    if (!data?.length) { tbody.innerHTML = ''; empty.style.display = 'block'; document.getElementById('appBadge').textContent = '0'; return; }
+    empty.style.display = 'none';
+    tbody.innerHTML = data.map(a => `<tr><td style="font-weight:600">#${a.id}</td><td>${a.service_name}</td><td style="font-size:0.8rem;color:var(--text-secondary)">${new Date(a.submitted_at).toLocaleDateString('en-UG',{day:'numeric',month:'short',year:'numeric'})}</td><td><span class="status-badge status-${a.status}">${a.status.replace(/_/g,' ')}</span></td><td><button class="btn btn-sm btn-ghost" onclick="showMsg('success','#${a.id}: ${a.status.replace(/_/g,' ')}')">View</button></td></tr>`).join('');
+    document.getElementById('appBadge').textContent = data.length;
+  } catch(e) {}
+}
+
+// ===== SEARCH =====
+let searchTimer = null;
+async function doSearch() {
+  clearTimeout(searchTimer); const q = document.getElementById('searchInput').value.trim();
+  if (!q) { document.getElementById('searchResults').innerHTML = ''; return; }
+  searchTimer = setTimeout(async () => {
+    try {
+      const [services, ministries] = await Promise.all([api('GET',`/catalogue/search?q=${encodeURIComponent(q)}`), api('GET',`/catalogue/ministries/search?q=${encodeURIComponent(q)}`)]);
+      const c = document.getElementById('searchResults');
+      let html = '';
+      if (services.length) html += `<strong style="font-size:0.78rem;text-transform:uppercase;color:var(--text-secondary);letter-spacing:0.04em">Services (${services.length})</strong>` + services.map(s => `<div class="search-result" onclick="showServiceDetail(${s.id})" tabindex="0" role="button" style="cursor:pointer"><h4>${s.name}</h4><div class="ministry">${s.ministry} &middot; UGX ${s.fee.toLocaleString()}</div><p>${s.description}</p></div>`).join('');
+      if (ministries.length) html += `<strong style="font-size:0.78rem;text-transform:uppercase;color:var(--text-secondary);letter-spacing:0.04em;display:block;margin-top:12px">Ministries (${ministries.length})</strong>` + ministries.map(m => `<div class="search-result" onclick="navigateTo('ministries');setTimeout(()=>{document.getElementById('ministrySearch').value='${m.name.replace(/'/g,"\\'")}';loadMinistries()},100)" tabindex="0" role="button" style="cursor:pointer"><h4>${m.name}</h4><div class="ministry">${m.full_name} &middot; <span class="m-cat">${m.category}</span></div></div>`).join('');
+      if (!services.length && !ministries.length) html = '<div class="empty-state"><div class="empty-icon material-icons-round">search_off</div><h4>No results</h4><p>Try a different search term.</p></div>';
+      c.innerHTML = html;
+    } catch(e) { showMsg('error','Search failed'); }
+  }, 300);
+}
+function quickSearchGo() {
+  const q = document.getElementById('quickSearch').value.trim();
+  if (q) { navigateTo('search'); document.getElementById('searchInput').value = q; doSearch(); }
+}
+
+// ===== MINISTRIES =====
+const MINISTRY_LOGOS = {
+  'NIRA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><text x="20" y="24" text-anchor="middle" fill="white" font-size="12" font-weight="800" font-family="Inter">NIRA</text><circle cx="20" cy="8" r="3" fill="#c8a84e"/></svg>`},
+  'MIA':{c:'#922b21',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#922b21"/><path d="M20 6l-8 6v6c0 6 3.5 11.5 8 13 4.5-1.5 8-7 8-13v-6z" fill="none" stroke="white" stroke-width="2"/><text x="20" y="30" text-anchor="middle" fill="white" font-size="8" font-weight="700">MIA</text></svg>`},
+  'URSB':{c:'#1f618d',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1f618d"/><path d="M12 10h16v20H12z" fill="none" stroke="white" stroke-width="2"/><path d="M16 16h8M16 20h8M16 24h8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="6" font-weight="700">URSB</text></svg>`},
+  'URA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><path d="M12 26l4-12 4 8 4-8 4 12" fill="none" stroke="#c8a84e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="7" font-weight="700">URA</text></svg>`},
+  'NSSF':{c:'#196f3d',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#196f3d"/><circle cx="20" cy="18" r="8" fill="none" stroke="white" stroke-width="2"/><text x="20" y="21" text-anchor="middle" fill="white" font-size="8" font-weight="800">NSSF</text></svg>`},
+  'UBOS':{c:'#2c3e50',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2c3e50"/><rect x="10" y="20" width="4" height="10" fill="#85c1e9"/><rect x="16" y="14" width="4" height="16" fill="#f9e79f"/><rect x="22" y="8" width="4" height="22" fill="#76d7c4"/><rect x="28" y="16" width="4" height="14" fill="#f1948a"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="6" font-weight="700">UBOS</text></svg>`},
+  'UNRA':{c:'#b7950b',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#b7950b"/><path d="M10 30l4-10h12l4 10" fill="none" stroke="white" stroke-width="2"/><rect x="14" y="20" width="12" height="3" fill="white"/><circle cx="15" cy="28" r="2" fill="white"/><circle cx="25" cy="28" r="2" fill="white"/><text x="20" y="36" text-anchor="middle" fill="white" font-size="5" font-weight="700">UNRA</text></svg>`},
+  'MoH':{c:'#c0392b',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#c0392b"/><path d="M20 10v12M14 16h12" stroke="white" stroke-width="3" stroke-linecap="round"/><text x="20" y="33" text-anchor="middle" fill="white" font-size="6" font-weight="700">MoH</text></svg>`},
+  'MoES':{c:'#2471a3',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2471a3"/><path d="M20 8l-8 6v8l8 6 8-6v-8z" fill="none" stroke="white" stroke-width="2"/><text x="20" y="21" text-anchor="middle" fill="white" font-size="10" font-weight="800">MoES</text></svg>`},
+  'MAAIF':{c:'#1e8449',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1e8449"/><path d="M20 8c0 0-6 4-6 10s6 10 6 10 6-4 6-10-6-10-6-10z" fill="none" stroke="#f9e79f" stroke-width="2"/><path d="M18 14l2-2 2 2" fill="none" stroke="white" stroke-width="1.5"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MAAIF</text></svg>`},
+  'MoWE':{c:'#2980b9',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2980b9"/><path d="M14 24c0-6 6-12 6-12s6 6 6 12-2.7 6-6 6-6-2.7-6-6z" fill="none" stroke="white" stroke-width="2"/><text x="20" y="34" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoWE</text></svg>`},
+  'MoFPED':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><circle cx="20" cy="18" r="8" fill="none" stroke="#c8a84e" stroke-width="2"/><text x="20" y="21" text-anchor="middle" fill="#c8a84e" font-size="7" font-weight="800">UGX</text></svg>`},
+  'MoLG':{c:'#2e6b9e',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2e6b9e"/><path d="M12 26l8-12 8 12" fill="none" stroke="white" stroke-width="2"/><rect x="16" y="18" width="8" height="8" fill="none" stroke="white" stroke-width="1.5"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoLG</text></svg>`},
+  'MoGLSD':{c:'#6c3483',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#6c3483"/><circle cx="20" cy="14" r="4" fill="none" stroke="white" stroke-width="1.5"/><path d="M14 28c0-5 6-5 6-5s6 0 6 5" fill="none" stroke="white" stroke-width="2"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoGLSD</text></svg>`},
+  'MoJCA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><rect x="14" y="8" width="12" height="24" rx="2" fill="none" stroke="#c8a84e" stroke-width="2"/><line x1="14" y1="14" x2="26" y2="14" stroke="#c8a84e" stroke-width="1.5"/><text x="20" y="34" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoJCA</text></svg>`},
+  'MoICT':{c:'#1f618d',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1f618d"/><circle cx="20" cy="20" r="6" fill="none" stroke="white" stroke-width="2"/><path d="M10 20h4M26 20h4M20 10v4M20 26v4" stroke="white" stroke-width="1.5"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoICT</text></svg>`},
+  'MoPS':{c:'#2c3e50',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2c3e50"/><ellipse cx="20" cy="14" rx="6" ry="4" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 28c0-6 8-6 8-6s8 0 8 6" fill="none" stroke="white" stroke-width="2"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoPS</text></svg>`},
+  'MoLHUD':{c:'#7b7d7d',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#7b7d7d"/><path d="M12 28V16l8-8 8 8v12H12z" fill="none" stroke="white" stroke-width="2"/><rect x="17" y="20" width="6" height="8" fill="white"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoLHUD</text></svg>`},
+  'MoTWA':{c:'#1a6e5c',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a6e5c"/><path d="M20 8c-4 0-8 4-8 8 0 6 8 14 8 14s8-8 8-14c0-4-4-8-8-8z" fill="none" stroke="white" stroke-width="2"/><circle cx="20" cy="16" r="3" fill="white"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoTWA</text></svg>`},
+  'MoFA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><circle cx="20" cy="18" r="10" fill="none" stroke="white" stroke-width="1.5"/><path d="M10 18h20M14 12s6-3 6-3 6 3 6 3M14 24s6 3 6 3 6-3 6-3" stroke="white" stroke-width="1" opacity="0.5"/><text x="20" y="21" text-anchor="middle" fill="white" font-size="7" font-weight="700">MoFA</text></svg>`},
+  'UNBS':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><path d="M12 10h16l-4 10 4 10H12l4-10z" fill="none" stroke="#c8a84e" stroke-width="2"/><text x="20" y="22" text-anchor="middle" fill="#c8a84e" font-size="8" font-weight="800">UNBS</text></svg>`},
+  'NWSC':{c:'#2471a3',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2471a3"/><path d="M20 8c-2 0-6 6-6 12s3 10 6 10 6-4 6-10-4-12-6-12z" fill="none" stroke="white" stroke-width="2"/><path d="M16 18l4-4 4 4" fill="none" stroke="white" stroke-width="1.5"/><text x="20" y="34" text-anchor="middle" fill="white" font-size="5" font-weight="700">NWSC</text></svg>`},
+  'KCCA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><rect x="14" y="14" width="12" height="16" fill="none" stroke="white" stroke-width="2"/><path d="M16 14V8h8v6" fill="none" stroke="white" stroke-width="2"/><rect x="17" y="22" width="6" height="8" fill="white"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">KCCA</text></svg>`},
+  'UWA':{c:'#1e8449',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1e8449"/><path d="M20 8c-4 0-6 3-6 6 0 4 6 10 6 10s6-6 6-10c0-3-2-6-6-6z" fill="none" stroke="white" stroke-width="2"/><path d="M13 30l14-2" stroke="white" stroke-width="2" stroke-linecap="round"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">UWA</text></svg>`},
+  'NITA':{c:'#6c3483',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#6c3483"/><rect x="12" y="10" width="16" height="20" rx="2" fill="none" stroke="white" stroke-width="2"/><circle cx="20" cy="18" r="3" fill="none" stroke="white" stroke-width="1.5"/><path d="M16 26c0-3 4-3 4-3s4 0 4 3" fill="none" stroke="white" stroke-width="1.5"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">NITA</text></svg>`},
+};
+const MINISTRY_COLORS = {
+  'ministry':'#0c2d5e','agency':'#2e6b9e','authority':'#c8a84e','fund':'#2e7d32','commission':'#7b1fa2','security':'#c62828',
+};
+async function loadMinistries() {
+  try {
+    const q = document.getElementById('ministrySearch')?.value.trim();
+    const data = await api('GET',`/catalogue/ministries/search?q=${encodeURIComponent(q||'')}`);
+    document.getElementById('ministryGrid').innerHTML = data.map(m => {
+      const logo = MINISTRY_LOGOS[m.name];
+      const mc = MINISTRY_COLORS[m.category] || '#2e6b9e';
+      return `<div class="ministry-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="m-logo-svg">${logo ? logo.svg : '<div style="width:40px;height:40px;border-radius:10px;background:'+mc+';color:white;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700">'+(m.name.charAt(0))+'</div>'}</div><div style="flex:1;min-width:0"><div class="m-name">${m.name}</div><div class="m-full">${m.full_name}</div></div></div><span class="m-cat" style="background:${mc}18;color:${mc}">${m.category}</span><a class="m-link" href="${m.website}" target="_blank" rel="noopener"><span class="material-icons-round" style="font-size:14px">open_in_new</span> Visit website</a></div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+// ===== MAP =====
+let mapInitialized = false;
+let mapMarkers = [];
+const MAP_LOCATIONS = [
+  { name: 'Parliament of Uganda', lat: 0.3136, lng: 32.5811, desc: 'Kampala', type: 'ministry' },
+  { name: 'NIRA Headquarters', lat: 0.3280, lng: 32.5900, desc: 'Kampala', type: 'ministry' },
+  { name: 'Ministry of Health', lat: 0.3150, lng: 32.5750, desc: 'Kampala', type: 'health' },
+  { name: 'Mulago National Referral Hospital', lat: 0.3320, lng: 32.5780, desc: 'Kampala', type: 'health' },
+  { name: 'Ministry of Education', lat: 0.3200, lng: 32.5800, desc: 'Kampala', type: 'education' },
+  { name: 'Makerere University', lat: 0.3350, lng: 32.5690, desc: 'Kampala', type: 'education' },
+  { name: 'URA Headquarters', lat: 0.3250, lng: 32.5850, desc: 'Kampala', type: 'financial' },
+  { name: 'NSSF Headquarters', lat: 0.3220, lng: 32.5820, desc: 'Kampala', type: 'financial' },
+  { name: 'URSB', lat: 0.3100, lng: 32.5780, desc: 'Kampala', type: 'ministry' },
+  { name: 'Uganda Police HQ', lat: 0.3180, lng: 32.5860, desc: 'Kampala', type: 'security' },
+  { name: 'Jinja Service Centre', lat: 0.4250, lng: 33.2025, desc: 'Jinja', type: 'service_centre' },
+  { name: 'Mbale Regional Office', lat: 1.0800, lng: 34.1750, desc: 'Mbale', type: 'service_centre' },
+  { name: 'Gulu Service Centre', lat: 2.7750, lng: 32.3050, desc: 'Gulu', type: 'service_centre' },
+  { name: 'Mbarara Regional Office', lat: -0.6070, lng: 30.6545, desc: 'Mbarara', type: 'service_centre' },
+  { name: 'Arua Service Centre', lat: 3.0200, lng: 30.9100, desc: 'Arua', type: 'service_centre' },
+  { name: 'Fort Portal Service Centre', lat: 0.6710, lng: 30.2750, desc: 'Fort Portal', type: 'service_centre' },
+  { name: 'Lira Service Centre', lat: 2.2350, lng: 32.9000, desc: 'Lira', type: 'service_centre' },
+  { name: 'Entebbe International Airport', lat: 0.0421, lng: 32.4435, desc: 'Entebbe', type: 'ministry' },
+  { name: 'Kawempe National Referral Hospital', lat: 0.3450, lng: 32.5600, desc: 'Kampala', type: 'health' },
+  { name: 'Kyambogo University', lat: 0.3420, lng: 32.6100, desc: 'Kampala', type: 'education' },
+];
+const MAP_COLORS = { ministry:'#1565c0', health:'#2e7d32', education:'#e65100', service_centre:'#7b1fa2', security:'#c62828', financial:'#c8a84e' };
+
+function initMap() {
+  if (mapInitialized) { document.getElementById('ugandaMap')._leaflet_id && setTimeout(() => window.dispatchEvent(new Event('resize')), 100); return; }
+  try {
+    STATE.map = L.map('ugandaMap').setView([1.3733, 32.2903], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 18 }).addTo(STATE.map);
+    mapMarkers = MAP_LOCATIONS.map(l => {
+      const color = MAP_COLORS[l.type] || '#1565c0';
+      const icon = L.divIcon({ className:'', html:`<div style="width:20px;height:20px;background:${color};border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`, iconSize:[20,20], iconAnchor:[10,10] });
+      const marker = L.marker([l.lat, l.lng], { icon }).addTo(STATE.map);
+      marker.bindPopup(`<strong>${l.name}</strong><br>${l.desc}<br><span style="font-size:0.72rem;text-transform:capitalize;color:${color}">${l.type.replace(/_/g,' ')}</span>`);
+      marker._locData = l;
+      return marker;
+    });
+    mapInitialized = true;
+  } catch(e) { setTimeout(initMap, 500); }
+}
+
+function filterMapMarkers() {
+  const q = document.getElementById('mapSearch').value.trim().toLowerCase();
+  mapMarkers.forEach(m => {
+    const d = m._locData;
+    const match = !q || d.name.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q) || d.type.toLowerCase().includes(q);
+    if (match) { m.addTo(STATE.map); } else { m.remove(); }
+  });
+}
+
+function toggleMapFullscreen() {
+  const wrapper = document.getElementById('mapWrapper');
+  const btn = document.getElementById('fullscreenBtn');
+  const isFull = wrapper.classList.toggle('fullscreen');
+  btn.innerHTML = isFull ? '<span class="material-icons-round" style="font-size:1rem">fullscreen_exit</span> Normal View' : '<span class="material-icons-round" style="font-size:1rem">fullscreen</span> Full Screen';
+  setTimeout(() => STATE.map && STATE.map.invalidateSize(), 300);
+}
+
+function showMapNotif(text, type) {
+  const overlay = document.getElementById('mapNotifOverlay');
+  overlay.innerHTML = `<div class="map-notif-item"><span class="material-icons-round" style="color:${type==='success'?'var(--success)':'var(--error)'}">${type==='success'?'check_circle':'error'}</span><span>${text}</span></div>`;
+  overlay.classList.add('active');
+  clearTimeout(overlay._timer);
+  overlay._timer = setTimeout(() => overlay.classList.remove('active'), 3000);
+}
+
+// ===== PHOTO UPLOAD =====
+async function uploadPhoto(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  if (file.type !== 'image/jpeg') { showMsg('error','Only JPEG files accepted'); return; }
+  if (file.size > 5*1024*1024) { showMsg('error','File exceeds 5MB limit'); return; }
+  const fd = new FormData(); fd.append('file', file);
+  try {
+    const r = await fetch('/uploads/photo', { method: 'POST', headers: { 'Authorization': `Bearer ${STATE.token}` }, body: fd });
+    if (!r.ok) throw new Error((await r.json()).detail);
+    const d = await r.json();
+    const prev = document.getElementById('photoPreview');
+    prev.innerHTML = `<img src="${d.photo_url}?t=${Date.now()}" alt="Profile photo">`;
+    STATE.user.photo_url = d.photo_url;
+    updateSidebarAvatar(STATE.user);
+    showMsg('success','Photo uploaded successfully');
+  } catch(e) { showMsg('error',e.message); }
+}
+
+// ===== PROFILE =====
+async function loadProfile() {
+  try {
+    const p = await api('GET','/auth/profile');
+    document.getElementById('profileName').textContent = p.name;
+    document.getElementById('profileEmail').textContent = p.email;
+    document.getElementById('profileNin').value = p.nin;
+    document.getElementById('profilePhone').value = p.phone;
+    document.getElementById('profileNationality').value = p.nationality;
+    document.getElementById('profileCategory').value = p.category;
+    document.getElementById('profileVerified').value = p.verified ? '&#10003; Verified' : 'Not Verified';
+    if (p.photo_url) {
+      document.getElementById('photoPreview').innerHTML = `<img src="${p.photo_url}?t=${Date.now()}" alt="Profile photo">`;
+      STATE.user.photo_url = p.photo_url;
+      updateSidebarAvatar(STATE.user);
+    }
+  } catch(e) {}
+}
+
+// ===== FEEDBACK =====
+let feedbackRating = 0;
+function openFeedback() { closeModal('feedbackModal'); feedbackRating = 0; document.getElementById('feedbackMessage').value = ''; document.querySelectorAll('.feedback-star').forEach(s => s.classList.remove('active')); openModal('feedbackModal'); }
+function setFeedbackRating(r) { feedbackRating = r; document.querySelectorAll('.feedback-star').forEach(s => s.classList.toggle('active', parseInt(s.dataset.star) <= r)); }
+async function submitFeedback() {
+  const cat = document.getElementById('feedbackCategory').value;
+  const msg = document.getElementById('feedbackMessage').value.trim();
+  if (!msg) { showMsg('error','Please enter a message'); return; }
+  if (!feedbackRating) { showMsg('error','Please select a rating'); return; }
+  try {
+    await api('POST','/auth/feedback', { category: cat, rating: feedbackRating, message: msg });
+    showMsg('success','Thank you for your feedback!');
+    closeModal('feedbackModal');
+  } catch(e) { showMsg('error','Could not submit feedback: ' + e.message); }
+}
+
+// ===== DOCUMENTS =====
+async function loadDocuments() {
+  try {
+    const docs = await api('GET','/auth/documents');
+    const grid = document.getElementById('docGrid');
+    const stats = document.getElementById('docStats');
+    const total = docs.length;
+    const active = docs.filter(d => d.status === 'active').length;
+    stats.innerHTML = `<div class="stat-card stat-small"><div class="stat-value" style="font-size:1.1rem">${total}</div><div class="stat-label">Total</div></div><div class="stat-card stat-small"><div class="stat-value" style="font-size:1.1rem">${active}</div><div class="stat-label">Active</div></div>`;
+    if (!docs.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">folder_off</div><h4>No documents</h4></div>'; return; }
+    const typeColors = {'National ID':'#1a5276','Passport':'#c62828','Certificate':'#2e7d32','Permit':'#e65100','Receipt':'#6c3483','License':'#00838f'};
+    const typeIcons = {'National ID':'badge','Passport':'flight','Certificate':'verified','Permit':'assignment','Receipt':'receipt','License':'license'};
+    grid.innerHTML = docs.map(d => {
+      const c = typeColors[d.type] || '#2e6b9e';
+      const ic = typeIcons[d.type] || 'description';
+      return `<div class="doc-card"><div class="doc-icon" style="background:${c}18;color:${c}"><span class="material-icons-round">${ic}</span></div><div class="doc-info"><div class="d-name">${d.name}</div><div class="d-meta">${d.type} &middot; Issued ${d.issued}${d.expiry ? ' &middot; Exp '+d.expiry : ''} &middot; ${d.file_size}</div></div><span class="doc-badge ${d.status}">${d.status}</span><button class="doc-dl material-icons-round" onclick="showMsg('success','Downloading ${d.id}...')" title="Download ${d.name}" aria-label="Download ${d.name}">download</button></div>`;
+    }).join('');
+  } catch(e) { document.getElementById('docGrid').innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">error_outline</div><h4>Failed to load</h4></div>'; }
+}
+
+// ===== PAYMENTS =====
+async function loadPayments() {
+  try {
+    const pays = await api('GET','/auth/payments');
+    const list = document.getElementById('payList');
+    const empty = document.getElementById('payEmpty');
+    const stats = document.getElementById('payStats');
+    const total = pays.length;
+    const paid = pays.filter(p => p.status === 'paid').length;
+    const sum = pays.reduce((a,p) => a + (p.amount||0), 0);
+    stats.innerHTML = `<div class="stat-card stat-small"><div class="stat-value" style="font-size:1.1rem">${total}</div><div class="stat-label">Total</div></div><div class="stat-card stat-small"><div class="stat-value" style="font-size:1.1rem">${paid}</div><div class="stat-label">Paid</div></div><div class="stat-card stat-small"><div class="stat-value" style="font-size:1.1rem">UGX ${sum.toLocaleString()}</div><div class="stat-label">Total Spent</div></div>`;
+    if (!pays.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    list.innerHTML = pays.map(p => {
+      const statusColor = p.status === 'paid' ? 'var(--success)' : 'var(--warning)';
+      return `<div class="pay-card"><div class="pay-status" style="background:${statusColor}"></div><div class="pay-details"><div class="pay-prn">${p.prn}</div><div class="pay-meta">${p.channel.replace(/_/g,' ')} &middot; ${new Date(p.created_at).toLocaleDateString('en-UG',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div></div><div class="pay-amount" style="color:${statusColor}">UGX ${(p.amount||0).toLocaleString()}</div></div>`;
+    }).join('');
+  } catch(e) { document.getElementById('payList').innerHTML = ''; document.getElementById('payEmpty').style.display = 'block'; }
+}
+
+// ===== NEWS =====
+async function loadNews() {
+  try {
+    const news = await api('GET','/auth/news');
+    const list = document.getElementById('newsList');
+    if (!news.length) { list.innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">newspaper</div><h4>No news</h4></div>'; return; }
+    list.innerHTML = news.map(n => {
+      const tagColor = n.category === 'service' ? 'service' : n.category === 'announcement' ? 'announcement' : 'update';
+      return `<div class="news-card"><span class="news-tag ${tagColor}">${n.agency}</span><h4>${n.title}</h4><p>${n.summary}</p><div class="news-date">${new Date(n.date).toLocaleDateString('en-UG',{day:'numeric',month:'long',year:'numeric'})}</div></div>`;
+    }).join('');
+  } catch(e) { document.getElementById('newsList').innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">error_outline</div><h4>Failed to load</h4></div>'; }
+}
+
+// ===== HELP =====
+let helpData = null;
+async function loadHelp() {
+  try {
+    const h = await api('GET','/auth/help');
+    helpData = h;
+    renderHelp(h.categories);
+  } catch(e) { document.getElementById('helpContent').innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">error_outline</div><h4>Failed to load</h4></div>'; }
+}
+function renderHelp(cats) {
+  document.getElementById('helpContent').innerHTML = cats.map(c => `<div class="help-cat"><h4><span class="material-icons-round" style="font-size:18px">${c.icon}</span> ${c.name}</h4>${c.faqs.map(f => `<div class="help-faq"><div class="hq" onclick="toggleFaq(this)"><span>${f.q}</span><span class="material-icons-round" style="font-size:16px">expand_more</span></div><div class="ha">${f.a}</div></div>`).join('')}</div>`).join('');
+}
+function toggleFaq(el) {
+  const parent = el.parentElement;
+  const isOpen = parent.classList.contains('open');
+  document.querySelectorAll('.help-faq.open').forEach(f => f.classList.remove('open'));
+  if (!isOpen) parent.classList.add('open');
+}
+function filterHelp() {
+  const q = document.getElementById('helpSearchInput').value.trim().toLowerCase();
+  if (!helpData) return;
+  const filtered = helpData.categories.map(c => ({
+    ...c,
+    faqs: c.faqs.filter(f => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q)),
+  })).filter(c => c.faqs.length > 0 || !q);
+  renderHelp(q ? filtered : helpData.categories);
+}
+
+// ===== SETTINGS =====
+function savePrefs() {
+  localStorage.setItem('ugsp_email_notif', document.getElementById('setEmailNotif').checked);
+  localStorage.setItem('ugsp_sms_notif', document.getElementById('setSmsNotif').checked);
+}
+async function changePassword() {
+  const cur = document.getElementById('setCurPass').value;
+  const np = document.getElementById('setNewPass').value;
+  const cp = document.getElementById('setConfirmPass').value;
+  const msg = document.getElementById('setPassMsg');
+  if (!cur || !np) { msg.textContent = 'Please fill in all fields'; return; }
+  if (np !== cp) { msg.textContent = 'New passwords do not match'; return; }
+  if (np.length < 6) { msg.textContent = 'Password must be at least 6 characters'; return; }
+  try {
+    await api('POST','/auth/change-password',{current_password:cur,new_password:np});
+    msg.textContent = ''; showMsg('success','Password changed successfully');
+    document.getElementById('setCurPass').value = ''; document.getElementById('setNewPass').value = ''; document.getElementById('setConfirmPass').value = '';
+  } catch(e) { msg.textContent = e.message; }
+}
+async function loadSettingsActivity() {
+  try {
+    const acts = await api('GET','/auth/activity');
+    const el = document.getElementById('settingsActivity');
+    const recent = acts.slice(0, 3);
+    el.innerHTML = recent.map(a => `<div style="font-size:0.82rem;padding:4px 0;display:flex;gap:8px"><span class="material-icons-round" style="font-size:16px;color:var(--steel)">circle</span><span>${a.action} <span style="color:var(--text-secondary)">— ${timeAgo(a.timestamp)}</span></span></div>`).join('') || '<p style="font-size:0.82rem;color:var(--text-secondary)">No recent activity</p>';
+  } catch(e) {}
+}
+
+// ===== ACTIVITY LOG =====
+async function loadActivity() {
+  try {
+    const acts = await api('GET','/auth/activity');
+    const list = document.getElementById('activityList');
+    if (!acts.length) { list.innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">history</div><h4>No activity</h4><p>Your account activity will appear here.</p></div>'; return; }
+    list.innerHTML = acts.map(a => `<div class="activity-item"><div class="activity-dot"></div><div><div class="a-text">${a.action}</div><div class="a-meta">${timeAgo(a.timestamp)} &middot; ${a.device} &middot; ${a.ip}</div></div></div>`).join('');
+  } catch(e) { document.getElementById('activityList').innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">error_outline</div><h4>Failed to load</h4></div>'; }
+}
+function timeAgo(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString('en-UG',{day:'numeric',month:'short',year:'numeric'});
+}
+
+// ===== ABOUT =====
+async function loadAbout() {
+  try {
+    const a = await api('GET','/auth/about');
+    document.getElementById('aboutContent').innerHTML = `
+      <div class="about-hero"><h2>${a.name}</h2><p>${a.tagline} &mdash; ${a.description}</p></div>
+      <div class="about-section"><h4>About the Portal</h4><p><strong>Version:</strong> ${a.version}</p><p><strong>Ministry:</strong> ${a.ministry}</p><p><strong>Technical Agency:</strong> ${a.agency}</p></div>
+      <div class="about-section"><h4>Legal & Compliance</h4><p><strong>DPPA 2019:</strong> ${a.legal_framework.dppa_2019}</p><p style="margin-top:4px"><strong>Access to Information:</strong> ${a.legal_framework.access_information}</p><p style="margin-top:4px"><strong>e-Signature:</strong> ${a.legal_framework.e_signature}</p></div>
+      <div class="about-section"><h4>Our Commitments</h4><ul>${a.commitments.map(c => `<li>${c}</li>`).join('')}</ul></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">${Object.entries(a.stats).map(([k,v]) => `<div class="stat-card stat-small"><div class="stat-value" style="font-size:1.2rem">${v}</div><div class="stat-label" style="text-transform:capitalize">${k.replace(/_/g,' ')}</div></div>`).join('')}</div>`;
+  } catch(e) { document.getElementById('aboutContent').innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">error_outline</div><h4>Failed to load</h4></div>'; }
+}
+
+// ===== INIT =====
+initCategoryTabs();
+if (STATE.token) loadServices('all');
+</script>
+</body>
+</html>

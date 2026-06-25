@@ -1,0 +1,147 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "UG Online" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "UG Online" [ref=e8]
+      - navigation
+      - button "Contact Us" [ref=e10] [cursor=pointer]
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - heading "One-Stop Center for all Government e-Services" [level=1] [ref=e17]:
+            - text: One-Stop Center for all
+            - text: Government
+            - generic [ref=e18]:
+              - text: e-Services
+              - img [ref=e19]
+          - paragraph [ref=e21]:
+            - text: Citizens, Investors, Foreign Nationals
+            - text: Seamless Investment and Service Delivery
+          - generic [ref=e22]:
+            - generic [ref=e23]:
+              - generic [ref=e24]: 150+
+              - generic [ref=e25]: Services Available
+            - generic [ref=e27]:
+              - generic [ref=e28]: 50+
+              - generic [ref=e29]: Government Agencies
+          - paragraph [ref=e30]:
+            - text: or Dial
+            - generic [ref=e31]:
+              - text: "*165*27#"
+              - img [ref=e32]
+        - generic [ref=e35]:
+          - img "Coat of Arms" [ref=e37]
+          - heading "Welcome to UGOnline" [level=2] [ref=e38]
+          - generic [ref=e39]:
+            - button "Login" [ref=e40] [cursor=pointer]
+            - button "Sign Up" [ref=e41] [cursor=pointer]
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]: Email or National ID
+              - textbox "Email or National ID" [ref=e45]:
+                - /placeholder: Enter your email or NIN
+            - generic [ref=e46]:
+              - generic [ref=e47]: Password
+              - generic [ref=e48]:
+                - textbox "Password" [ref=e49]:
+                  - /placeholder: Enter your password
+                - button [ref=e50] [cursor=pointer]
+            - button "Forgot Password?" [ref=e53] [cursor=pointer]
+            - button "Sign In" [ref=e54] [cursor=pointer]
+      - generic [ref=e57]:
+        - img "Ministry of ICT & National Guidance" [ref=e59] [cursor=pointer]
+        - img "Uganda Investment Authority" [ref=e61] [cursor=pointer]
+        - img "Uganda Registration Services Bureau" [ref=e63] [cursor=pointer]
+        - img "Uganda Revenue Authority" [ref=e65] [cursor=pointer]
+        - img "Uganda National Bureau of Standards" [ref=e67] [cursor=pointer]
+        - img "National Identification & Registration Authority" [ref=e69] [cursor=pointer]
+        - img "Kampala Capital City Authority" [ref=e71] [cursor=pointer]
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]: Live Tracking
+          - heading "Track your submission" [level=2] [ref=e77]
+          - paragraph [ref=e78]: No login required. Enter your tracking number and get instant updates on your application or mail shipment.
+        - generic [ref=e79]:
+          - button "Track Application Check the real-time status of your government service application using your tracking number. Track now" [ref=e80] [cursor=pointer]:
+            - generic [ref=e82]:
+              - heading "Track Application" [level=3] [ref=e85]
+              - paragraph [ref=e86]: Check the real-time status of your government service application using your tracking number.
+              - generic [ref=e87]: Track now
+          - button "Track Mail Monitor your Posta Uganda mail shipment from origin to destination with live timeline updates. Track now" [ref=e89] [cursor=pointer]:
+            - generic [ref=e91]:
+              - heading "Track Mail" [level=3] [ref=e94]
+              - paragraph [ref=e95]: Monitor your Posta Uganda mail shipment from origin to destination with live timeline updates.
+              - generic [ref=e96]: Track now
+      - generic [ref=e100]:
+        - generic [ref=e101]:
+          - heading "How it works" [level=2] [ref=e102]
+          - generic [ref=e103]:
+            - generic [ref=e104]: "01"
+            - generic [ref=e108]:
+              - heading "Login & select a service" [level=4] [ref=e109]
+              - paragraph [ref=e110]: Login to your account or register
+          - generic [ref=e111]:
+            - generic [ref=e115]:
+              - heading "Submit Application" [level=4] [ref=e116]
+              - paragraph [ref=e117]: Fill out required forms & submit
+            - generic [ref=e118]: "02"
+          - generic [ref=e119]:
+            - generic [ref=e120]: "03"
+            - generic [ref=e124]:
+              - heading "Track & Receive" [level=4] [ref=e125]
+              - paragraph [ref=e126]: Receive your documents once ready.
+        - generic [ref=e127]:
+          - img "Person using smartphone" [ref=e129]
+          - img "Person working on laptop" [ref=e131]
+          - generic [ref=e135]:
+            - generic [ref=e136]: 2.5M+
+            - generic [ref=e137]:
+              - text: Applications
+              - text: Processed
+      - generic [ref=e139]:
+        - generic [ref=e143]:
+          - heading "Subscribe to eGovernment" [level=3] [ref=e144]
+          - paragraph [ref=e145]: You will receive updates, announcements, & important public services
+        - generic [ref=e146]:
+          - textbox "hello@email.com" [ref=e147]
+          - button "Subscribe" [ref=e148] [cursor=pointer]
+  - contentinfo [ref=e149]:
+    - generic [ref=e150]:
+      - generic [ref=e151]:
+        - generic [ref=e152]:
+          - img "UG Online" [ref=e153]
+          - paragraph [ref=e154]: Your trusted platform for accessing Uganda government services online. Simple, secure, and available 24/7.
+        - generic [ref=e162]:
+          - heading "Quick Links" [level=4] [ref=e163]
+          - list [ref=e164]:
+            - listitem [ref=e165]:
+              - link "Home" [ref=e166] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e167]:
+              - link "Agencies" [ref=e168] [cursor=pointer]:
+                - /url: /agencies
+            - listitem [ref=e169]: About Us
+            - listitem [ref=e170]: Help Center
+        - generic [ref=e171]:
+          - heading "Popular Services" [level=4] [ref=e172]
+          - list [ref=e173]:
+            - listitem [ref=e174]: National ID Services
+            - listitem [ref=e175]: Business Registration
+            - listitem [ref=e176]: Tax Services
+            - listitem [ref=e177]: Vehicle Registration
+        - generic [ref=e178]:
+          - heading "Contact" [level=4] [ref=e179]
+          - generic [ref=e180]:
+            - generic [ref=e183]: +256 800 100 200
+            - generic [ref=e186]: info@ugandaeservices.go.ug
+            - generic [ref=e189]:
+              - text: Ministry of ICT Building,
+              - text: Kampala, Uganda
+      - generic [ref=e190]:
+        - paragraph [ref=e191]: © 2026 UGOnline. All rights reserved.
+        - generic [ref=e192]:
+          - generic [ref=e193] [cursor=pointer]: Privacy
+          - generic [ref=e194] [cursor=pointer]: Terms
+          - generic [ref=e195] [cursor=pointer]: Accessibility

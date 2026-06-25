@@ -1,0 +1,82 @@
+from datetime import datetime
+from fastapi import APIRouter, HTTPException, Header
+from pydantic import BaseModel
+
+from ..v1.catalogue import SERVICES
+
+router = APIRouter(prefix="/applications", tags=["applications"])
+
+
+class ApplyRequest(BaseModel):
+    service_id: int
+    metadata: dict = {}
+
+
+APPLICATIONS_DB: list[dict] = []
+COUNTER = 0
+
+STATUS_FLOW = [
+    "draft",
+    "submitted",
+    "under_review",
+    "approved",
+    "rejected",
+]
+
+
+def _get_user_nin(authorization: str | None) -> str:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    token = authorization.replace("Bearer ", "", 1)
+    if not token.startswith("ugpass_"):
+        raise HTTPException(status_code=401, detail="Invalid token")
+    parts = token.replace("ugpass_", "", 1).split("_", 1)
+    if len(parts) < 1 or len(parts[0]) < 10:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return parts[0]
+
+
+@router.post("")
+async def create_application(
+    req: ApplyRequest,
+    authorization: str = Header(None),
+):
+    global COUNTER
+    nin = _get_user_nin(authorization)
+    valid_ids = {s["id"] for s in SERVICES if s["active"]}
+    if req.service_id not in valid_ids:
+        raise HTTPException(status_code=404, detail="Service not found")
+    COUNTER += 1
+    app = {
+        "id": COUNTER,
+        "user_nin": nin,
+        "service_id": req.service_id,
+        "status": "submitted",
+        "metadata": req.metadata,
+        "submitted_at": datetime.utcnow().isoformat(),
+        "updated_at": datetime.utcnow().isoformat(),
+    }
+    APPLICATIONS_DB.append(app)
+    return {"application_id": app["id"], "status": app["status"], "message": "Application submitted successfully"}
+
+
+@router.get("")
+async def list_applications(authorization: str = Header(None)):
+    nin = _get_user_nin(authorization)
+    user_apps = [a.copy() for a in APPLICATIONS_DB if a["user_nin"] == nin]
+    service_map = {s["id"]: s["name"] for s in SERVICES}
+    for a in user_apps:
+        a["service_name"] = service_map.get(a["service_id"], "Unknown Service")
+    return user_apps
+
+
+@router.get("/{app_id}")
+async def get_application(app_id: int, authorization: str = Header(None)):
+    nin = _get_user_nin(authorization)
+    for a in APPLICATIONS_DB:
+        if a["id"] == app_id and a["user_nin"] == nin:
+            result = a.copy()
+            service_map = {s["id"]: s["name"] for s in SERVICES}
+            result["service_name"] = service_map.get(result["service_id"], "Unknown Service")
+            return result
+    raise HTTPException(status_code=404, detail="Application not found")
