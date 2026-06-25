@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.playwright-mcp/
+.venv/
+env/
+venv/
+*.jpg
+*.png
+screenshot.png
