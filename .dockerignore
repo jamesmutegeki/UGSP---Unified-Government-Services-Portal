@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+.git
+.gitignore
+.env
+.venv
+venv
+.playwright-mcp
+*.jpg
+*.png
+*.docx
