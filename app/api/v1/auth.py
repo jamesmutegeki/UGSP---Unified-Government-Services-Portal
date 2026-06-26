@@ -189,7 +189,7 @@ async def login(req: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid NIN or password")
 
     minute_str = f"{datetime.utcnow().minute:02d}"
-    code = f"2FA{req.nin[-4:]}{minute_str}"
+    code = f"{req.nin[-4:]}{minute_str}"
     PENDING_2FA[req.nin] = code
     return {
         "token": f"2fa_{req.nin}",
