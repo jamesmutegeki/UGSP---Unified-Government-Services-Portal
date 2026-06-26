@@ -951,6 +951,36 @@ function doLogout() {
   document.getElementById('feedbackFab').style.display = 'none';
   document.getElementById('loginNin').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('loginError').textContent = '';
 }
+// ===== NAVIGATION =====
+const PAGE_ALIASES = { 'services': 'services', 'catalogue': 'services' };
+function navigateTo(page) {
+  page = PAGE_ALIASES[page] || page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1));
+  if (pg) pg.classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (nav) nav.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  window.location.hash = page;
+  if (page === 'map') setTimeout(initMap, 200);
+  if (page === 'documents') loadDocuments();
+  if (page === 'payments') loadPayments();
+  if (page === 'news') loadNews();
+  if (page === 'help') loadHelp();
+  if (page === 'activity') loadActivity();
+  if (page === 'about') loadAbout();
+  if (page === 'settings') loadSettingsActivity();
+}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+window.addEventListener('hashchange', () => { const p = location.hash.replace('#',''); if (p && document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1))) navigateTo(p); });
+function toggleSidebarCollapse() {
+  const layout = document.getElementById('appLayout');
+  const btn = document.querySelector('.sidebar-collapse');
+  const collapsed = layout.classList.toggle('sidebar-collapsed');
+  btn.classList.toggle('collapsed', collapsed);
+  btn.title = collapsed ? 'Show sidebar' : 'Collapse sidebar';
+}
 (function() { const r=localStorage.getItem('ugsp_remember_nin'); if(r) document.getElementById('loginNin').value=r; const t=localStorage.getItem('ugsp_token'),u=localStorage.getItem('ugsp_user'); if(t&&u){ STATE.token=t; STATE.user=JSON.parse(u); enterApp(); } const h=location.hash.replace('#',''); if(h&&document.getElementById('page'+h.charAt(0).toUpperCase()+h.slice(1))) navigateTo(h); })();
 
 // ===== REGISTER =====
@@ -996,37 +1026,6 @@ async function forgotStep3() {
     showMsg('success','Password reset successfully! Sign in.');
     hideForgotPassword();
   } catch(e) { errEl.textContent=e.message; }
-}
-
-// ===== NAVIGATION =====
-const PAGE_ALIASES = { 'services': 'services', 'catalogue': 'services' };
-function navigateTo(page) {
-  page = PAGE_ALIASES[page] || page;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const pg = document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1));
-  if (pg) pg.classList.add('active');
-  const nav = document.querySelector(`.nav-item[data-page="${page}"]`);
-  if (nav) nav.classList.add('active');
-  document.getElementById('sidebar').classList.remove('open');
-  window.location.hash = page;
-  if (page === 'map') setTimeout(initMap, 200);
-  if (page === 'documents') loadDocuments();
-  if (page === 'payments') loadPayments();
-  if (page === 'news') loadNews();
-  if (page === 'help') loadHelp();
-  if (page === 'activity') loadActivity();
-  if (page === 'about') loadAbout();
-  if (page === 'settings') loadSettingsActivity();
-}
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-window.addEventListener('hashchange', () => { const p = location.hash.replace('#',''); if (p && document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1))) navigateTo(p); });
-function toggleSidebarCollapse() {
-  const layout = document.getElementById('appLayout');
-  const btn = document.querySelector('.sidebar-collapse');
-  const collapsed = layout.classList.toggle('sidebar-collapsed');
-  btn.classList.toggle('collapsed', collapsed);
-  btn.title = collapsed ? 'Show sidebar' : 'Collapse sidebar';
 }
 
 // ===== MODAL =====
