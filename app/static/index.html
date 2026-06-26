@@ -60,6 +60,7 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
 .login-error{color:var(--error);font-size:0.85rem;margin-top:8px;min-height:1.3em}
 .login-footer{margin-top:16px;font-size:0.78rem;color:var(--text-secondary)}
+.login-footer strong{font-weight:600}
 .login-footer a{color:var(--steel);font-weight:500;cursor:pointer}
 .login-footer a:hover{text-decoration:underline}
 .separator{display:flex;align-items:center;gap:12px;margin:16px 0;font-size:0.8rem;color:var(--text-secondary)}
@@ -224,6 +225,12 @@ tbody tr:hover{background:#f8fafc}
 .auth-toggle{color:var(--steel);font-weight:500;cursor:pointer}
 .auth-toggle:hover{text-decoration:underline}
 .wide-modal .modal{width:640px}
+/* Custom scrollbar — yellow thumb */
+.sidebar-nav::-webkit-scrollbar,.login-card::-webkit-scrollbar{width:6px}
+.sidebar-nav::-webkit-scrollbar-track,.login-card::-webkit-scrollbar-track{background:transparent}
+.sidebar-nav::-webkit-scrollbar-thumb,.login-card::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+.sidebar-nav{scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
+.login-card{scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
 /* Responsive */
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
@@ -233,10 +240,17 @@ tbody tr:hover{background:#f8fafc}
   .login-card{padding:32px 24px}.notif-panel{width:100%;right:-100%}
   .map-container{height:320px}
 }
+@media(max-width:480px){
+  .stat-grid{grid-template-columns:1fr}.stat-card{padding:14px}
+  .page-header h2{font-size:1.15rem}.top-bar{padding:0 12px}
+  .search-bar{max-width:100%}.login-card{padding:24px 18px;border-radius:16px}
+  .modal{max-height:90vh}.modal-body{padding:14px 16px}
+  .notif-panel{width:100%;right:-100%}
+}
 /* Coat of arms logo */
 .coa-sidebar{width:36px;height:36px;object-fit:contain;flex-shrink:0;display:block}
-/* Global sidebar collapsed state */
-.app-layout.sidebar-collapsed .sidebar{transform:translateX(-100%)}
+/* Global sidebar collapsed state — open always wins */
+.app-layout.sidebar-collapsed .sidebar:not(.open){transform:translateX(-100%)}
 .app-layout.sidebar-collapsed .main-content{margin-left:0}
 .app-layout.sidebar-collapsed .menu-toggle{display:block}
 @media(width>=769px){.app-layout.sidebar-collapsed .menu-toggle{display:block}}
@@ -348,6 +362,24 @@ tbody tr:hover{background:#f8fafc}
 .toggle-slider::before{content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s}
 .toggle input:checked+.toggle-slider{background:var(--steel)}
 .toggle input:checked+.toggle-slider::before{transform:translateX(20px)}
+/* UI/UX refinements */
+.page{animation:fadeIn 0.25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card,.service-card,.news-card,.help-cat,.about-section,.settings-card{border:1px solid transparent}
+.card:hover,.help-cat:hover,.about-section:hover,.settings-card:hover{border-color:var(--border)}
+.stat-card .stat-value{transition:color var(--transition)}
+.stat-click:hover .stat-value{color:var(--steel)}
+.form-group input,.form-group select{transition:border-color var(--transition),box-shadow var(--transition)}
+.form-group input:focus,.form-group select:focus{box-shadow:0 0 0 3px rgba(46,107,158,0.12)}
+.btn{position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.1);opacity:0;transition:opacity var(--transition)}
+.btn:active::after{opacity:1}
+.badge{transition:transform 0.15s ease}
+.nav-item.active .badge{transform:scale(1.05)}
+.login-card h1{letter-spacing:-0.01em}
+.page-header h2{letter-spacing:-0.015em}
+.refresh-indicator{font-size:0.7rem;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;opacity:0;transition:opacity 0.3s}
+.refresh-indicator.show{opacity:1}
 </style>
 </head>
 <body>
@@ -363,7 +395,8 @@ tbody tr:hover{background:#f8fafc}
     <p class="subtitle">Republic of Uganda — UGPass Single Sign-On</p>
     <div class="form-group"><label for="loginNin">National ID (NIN)</label><input type="text" id="loginNin" placeholder="e.g. T1234567890" autocomplete="username" aria-required="true"></div>
     <div class="form-group"><label for="loginPass">Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="UGPass password" autocomplete="current-password" aria-required="true"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('loginPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
-    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Sign in with UGPass</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px"><label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="loginRemember" checked style="accent-color:var(--navy);width:16px;height:16px"> Remember me</label><a onclick="showForgotPassword()" style="font-size:0.78rem;color:var(--steel);cursor:pointer;font-weight:500">Forgot password?</a></div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()"><span id="loginBtnText">Sign in with UGPass</span><span id="loginSpinner" class="material-icons-round spin" style="display:none;font-size:1.1rem">hourglass_top</span></button>
     <p class="login-error" id="loginError" role="alert"></p>
     <div class="tfa-section" id="tfaSection">
       <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px">Two-Factor Authentication</div>
@@ -381,7 +414,7 @@ tbody tr:hover{background:#f8fafc}
     </div>
     <div class="separator">or</div>
     <button class="btn btn-secondary" style="width:100%" onclick="showRegister()">Create an Account</button>
-    <p class="login-footer"><a onclick="showForgotPassword()">Forgot your password?</a> &middot; Demo: <strong>T1234567890</strong> / pass123</p>
+    <p class="login-footer">Demo: <strong>T1234567890</strong> / pass123 &middot; Powered by <strong>UGPass</strong></p>
   </div>
 </div>
 
@@ -400,7 +433,7 @@ tbody tr:hover{background:#f8fafc}
     <div class="form-group"><label>Phone</label><input type="text" id="regPhone" placeholder="+256 700 000 000"></div>
     <div class="form-group"><label>Category</label><select id="regCategory"><option value="citizen">Citizen</option><option value="business">Business</option><option value="visitor">Visitor</option></select></div>
     <div class="form-group"><label>Password</label><div class="pw-wrap"><input type="password" id="regPass" placeholder="Create a strong password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('regPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
-    <button class="btn btn-primary" onclick="doRegister()">Create Account</button>
+    <button class="btn btn-primary" id="regBtn" type="button" onclick="doRegister()">Create Account</button>
     <p class="login-footer">Already have an account? <a class="auth-toggle" onclick="hideRegister()">Sign in</a></p>
   </div>
 </div>
@@ -437,20 +470,20 @@ tbody tr:hover{background:#f8fafc}
       <button class="sidebar-collapse material-icons-round" onclick="toggleSidebarCollapse()" title="Collapse sidebar" aria-label="Collapse sidebar">chevron_left</button>
     </div>
     <nav class="sidebar-nav">
-      <button class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')" aria-current="page"><span class="icon material-icons-round">dashboard</span> Dashboard</button>
-      <button class="nav-item" data-page="services" onclick="navigateTo('services')"><span class="icon material-icons-round">grid_view</span> Services</button>
-      <button class="nav-item" data-page="search" onclick="navigateTo('search')"><span class="icon material-icons-round">search</span> Search</button>
-      <button class="nav-item" data-page="documents" onclick="navigateTo('documents')"><span class="icon material-icons-round">folder</span> Documents</button>
-      <button class="nav-item" data-page="applications" onclick="navigateTo('applications')"><span class="icon material-icons-round">description</span> Applications <span class="badge" id="appBadge">0</span></button>
-      <button class="nav-item" data-page="payments" onclick="navigateTo('payments')"><span class="icon material-icons-round">account_balance_wallet</span> Payments</button>
-      <button class="nav-item" data-page="ministries" onclick="navigateTo('ministries')"><span class="icon material-icons-round">account_balance</span> Ministries</button>
-      <button class="nav-item" data-page="map" onclick="navigateTo('map')"><span class="icon material-icons-round">map</span> Service Map</button>
-      <button class="nav-item" data-page="news" onclick="navigateTo('news')"><span class="icon material-icons-round">newspaper</span> News</button>
-      <button class="nav-item" data-page="help" onclick="navigateTo('help')"><span class="icon material-icons-round">help</span> Help</button>
-      <button class="nav-item" data-page="profile" onclick="navigateTo('profile')"><span class="icon material-icons-round">person</span> Profile</button>
-      <button class="nav-item" data-page="activity" onclick="navigateTo('activity')"><span class="icon material-icons-round">history</span> Activity</button>
-      <button class="nav-item" data-page="about" onclick="navigateTo('about')"><span class="icon material-icons-round">info</span> About</button>
-      <button class="nav-item" data-page="settings" onclick="navigateTo('settings')"><span class="icon material-icons-round">settings</span> Settings</button>
+      <button class="nav-item active" data-page="dashboard" data-i18n="nav.dashboard" onclick="navigateTo('dashboard')" aria-current="page"><span class="icon material-icons-round">dashboard</span> Dashboard</button>
+      <button class="nav-item" data-page="services" data-i18n="nav.services" onclick="navigateTo('services')"><span class="icon material-icons-round">grid_view</span> Services</button>
+      <button class="nav-item" data-page="search" data-i18n="nav.search" onclick="navigateTo('search')"><span class="icon material-icons-round">search</span> Search</button>
+      <button class="nav-item" data-page="documents" data-i18n="nav.documents" onclick="navigateTo('documents')"><span class="icon material-icons-round">folder</span> Documents</button>
+      <button class="nav-item" data-page="applications" data-i18n="nav.applications" onclick="navigateTo('applications')"><span class="icon material-icons-round">description</span> Applications <span class="badge" id="appBadge">0</span></button>
+      <button class="nav-item" data-page="payments" data-i18n="nav.payments" onclick="navigateTo('payments')"><span class="icon material-icons-round">account_balance_wallet</span> Payments</button>
+      <button class="nav-item" data-page="ministries" data-i18n="nav.ministries" onclick="navigateTo('ministries')"><span class="icon material-icons-round">account_balance</span> Ministries</button>
+      <button class="nav-item" data-page="map" data-i18n="nav.map" onclick="navigateTo('map')"><span class="icon material-icons-round">map</span> Service Map</button>
+      <button class="nav-item" data-page="news" data-i18n="nav.news" onclick="navigateTo('news')"><span class="icon material-icons-round">newspaper</span> News</button>
+      <button class="nav-item" data-page="help" data-i18n="nav.help" onclick="navigateTo('help')"><span class="icon material-icons-round">help</span> Help</button>
+      <button class="nav-item" data-page="profile" data-i18n="nav.profile" onclick="navigateTo('profile')"><span class="icon material-icons-round">person</span> Profile</button>
+      <button class="nav-item" data-page="activity" data-i18n="nav.activity" onclick="navigateTo('activity')"><span class="icon material-icons-round">history</span> Activity</button>
+      <button class="nav-item" data-page="about" data-i18n="nav.about" onclick="navigateTo('about')"><span class="icon material-icons-round">info</span> About</button>
+      <button class="nav-item" data-page="settings" data-i18n="nav.settings" onclick="navigateTo('settings')"><span class="icon material-icons-round">settings</span> Settings</button>
     </nav>
     <div class="sidebar-footer">
       <div class="user-info"><div class="user-avatar" id="userAvatar">G</div><div class="user-details"><div class="user-name" id="userName">Grace Akello</div><div class="user-nin" id="userNin">T1234567890</div></div><button class="logout-btn material-icons-round" onclick="doLogout()" aria-label="Sign out">logout</button></div>
@@ -554,8 +587,9 @@ tbody tr:hover{background:#f8fafc}
       <div id="docStats" style="display:flex;gap:12px;margin-bottom:18px"></div>
       <div class="page-2col">
         <div>
-          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-            <button class="btn btn-sm btn-primary" onclick="loadDocuments()"><span class="material-icons-round" style="font-size:16px">refresh</span> Refresh</button>
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-sm btn-primary" onclick="loadDocuments();showRefresh('docRefresh')"><span class="material-icons-round" style="font-size:16px">refresh</span> Refresh</button>
+            <span class="refresh-indicator" id="docRefresh"></span>
           </div>
           <div id="docGrid"></div>
         </div>
@@ -569,8 +603,9 @@ tbody tr:hover{background:#f8fafc}
     <!-- Payments -->
     <div class="page" id="pagePayments">
       <div class="page-header"><h2 data-i18n="nav.payments">Payment History</h2><p data-i18n="pages.payments.subtitle">View all your payments, receipts, and transaction history.</p></div>
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-        <button class="btn btn-sm btn-primary" onclick="loadPayments()"><span class="material-icons-round" style="font-size:16px">refresh</span> Refresh</button>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-sm btn-primary" onclick="loadPayments();showRefresh('payRefresh')"><span class="material-icons-round" style="font-size:16px">refresh</span> Refresh</button>
+        <span class="refresh-indicator" id="payRefresh"></span>
       </div>
       <div id="payStats" style="display:flex;gap:12px;margin-bottom:16px"></div>
       <div id="payList"></div>
@@ -634,7 +669,7 @@ tbody tr:hover{background:#f8fafc}
 <div class="modal-overlay" id="serviceModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><h3 id="modalTitle">Service Details</h3><button class="modal-close material-icons-round" onclick="closeModal('serviceModal')" aria-label="Close">close</button></div><div class="modal-body" id="serviceModalBody"></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('serviceModal')">Cancel</button><button class="btn btn-primary" id="applyBtn" onclick="applyService()">Apply Now</button></div></div></div>
 
 <!-- Cart Modal -->
-<div class="modal-overlay" id="cartModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="cartTitle"><div class="modal-header"><h3 id="cartTitle">Checkout</h3><button class="modal-close material-icons-round" onclick="closeModal('cartModal')" aria-label="Close">close</button></div><div class="modal-body"><div class="checkout-summary" id="checkoutSummary"></div><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:8px">Payment Channel</label><div class="payment-channels"><label class="pay-channel selected"><input type="radio" name="channel" value="mobile_money" checked><span class="chan-label">Mobile Money</span></label><label class="pay-channel"><input type="radio" name="channel" value="card"><span class="chan-label">Card Payment</span></label><label class="pay-channel"><input type="radio" name="channel" value="bank"><span class="chan-label">Bank Transfer</span></label></div><div id="prnContainer"></div></div><div class="modal-footer" id="cartFooter"><button class="btn btn-secondary" onclick="closeModal('cartModal')">Close</button><button class="btn btn-success" id="checkoutBtn" onclick="doCheckout()">Generate PRN</button></div></div></div>
+<div class="modal-overlay" id="cartModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="cartTitle"><div class="modal-header"><h3 id="cartTitle">Checkout</h3><button class="modal-close material-icons-round" onclick="closeModal('cartModal')" aria-label="Close">close</button></div><div class="modal-body"><div class="checkout-summary" id="checkoutSummary"></div><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:8px">Payment Channel</label><div class="payment-channels"><label class="pay-channel selected" onclick="updatePayFields('mobile_money')"><input type="radio" name="channel" value="mobile_money" checked><span class="chan-label">Mobile Money</span></label><label class="pay-channel" onclick="updatePayFields('card')"><input type="radio" name="channel" value="card"><span class="chan-label">Card Payment</span></label><label class="pay-channel" onclick="updatePayFields('bank')"><input type="radio" name="channel" value="bank"><span class="chan-label">Bank Transfer</span></label></div><div id="payFields" style="margin-top:12px"></div><div id="prnContainer"></div></div><div class="modal-footer" id="cartFooter"><button class="btn btn-secondary" onclick="closeModal('cartModal')">Close</button><button class="btn btn-success" id="checkoutBtn" onclick="doCheckout()">Generate PRN</button></div></div></div>
 
 <script>
 // ===== STATE =====
@@ -700,8 +735,21 @@ function setLanguage(lang) {
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    el.textContent = tr(key);
+    const icon = el.querySelector('.icon,.material-icons-round');
+    if (el.querySelector('.badge')) {
+      const txt = el.childNodes[el.childNodes.length-1];
+      if (txt) txt.textContent = tr(key);
+    } else if (icon && icon.nextSibling) {
+      icon.nextSibling.textContent = tr(key);
+    } else if (icon && !icon.nextSibling) {
+      el.textContent = tr(key);
+    } else {
+      el.textContent = tr(key);
+    }
   });
+  if (STATE.token && document.getElementById('appLayout').classList.contains('active')) {
+    loadDashboard(); loadApplications();
+  }
 }
 (function() { const saved = localStorage.getItem('ugsp_lang'); if (saved) setLanguage(saved); })();
 
@@ -716,21 +764,31 @@ async function api(method, path, body) {
 }
 
 // ===== NOTIFICATIONS =====
+function loadNotifHistory() {
+  try { const h = JSON.parse(localStorage.getItem('ugsp_notif_history') || '[]'); STATE.notifHistory = h.map(n => ({ ...n, time: new Date(n.time) })); } catch(e) { STATE.notifHistory = []; }
+  updateNotifDot();
+}
+function saveNotifHistory() {
+  localStorage.setItem('ugsp_notif_history', JSON.stringify(STATE.notifHistory.slice(0,100)));
+}
 function showMsg(type, text, appData) {
   const el = type === 'success' ? document.getElementById('msgSuccess') : document.getElementById('msgError');
   el.textContent = text; el.classList.add('show');
   const id = setTimeout(() => { el.classList.remove('show'); }, 2000);
   // Add to notification history
-  STATE.notifHistory.push({ type, text, time: new Date(), appData });
+  STATE.notifHistory.push({ type, text, time: new Date(), appData, read: false });
+  saveNotifHistory();
   updateNotifDot();
   // Also show on map if map page is active
   if (document.getElementById('pageMap').classList.contains('active')) {
     showMapNotif(text, type);
   }
+  if (document.getElementById('notifPanel').classList.contains('open')) renderNotifs();
 }
 function updateNotifDot() {
   const dot = document.getElementById('notifDot');
-  dot.style.display = STATE.notifHistory.length > 0 ? 'block' : 'none';
+  const unread = STATE.notifHistory.filter(n => !n.read).length;
+  dot.style.display = unread > 0 ? 'block' : 'none';
 }
 function toggleNotifPanel() {
   const panel = document.getElementById('notifPanel');
@@ -755,16 +813,27 @@ function renderNotifs() {
     body.innerHTML = '<div class="notif-empty"><div class="empty-icon material-icons-round" style="font-size:2rem">notifications_off</div><h4>No notifications</h4><p>No recent activity to show.</p></div>';
     return;
   }
-  body.innerHTML = STATE.notifHistory.map((n, i) => {
+  body.innerHTML = STATE.notifHistory.slice().reverse().map((n, ri) => {
+    const i = STATE.notifHistory.length - 1 - ri;
     const ico = getNotifIcon(n.text, n.type);
     const canClick = n.appData && n.appData.applicationId;
-    const isProgress = n.text.includes('submitted') || n.text.includes('In Progress');
-    const clickHandler = canClick ? `onclick="showNotifAppDetail(${i})"` : '';
-    return `<div class="notif-item ${canClick ? 'clickable' : ''}" ${clickHandler} tabindex="${canClick ? '0' : '-1'}" role="${canClick ? 'button' : ''}">
+    const isUnread = !n.read;
+    const clickHandler = canClick ? `onclick="markNotifRead(${i});showNotifAppDetail(${i})"` : `onclick="markNotifRead(${i})"`;
+    return `<div class="notif-item ${canClick ? 'clickable' : ''}" ${clickHandler} tabindex="${canClick ? '0' : '-1'}" role="${canClick ? 'button' : ''}" style="${isUnread ? 'background:#eef5fb;border-left:3px solid var(--steel)' : 'opacity:0.75'}">
       <span class="notif-icon material-icons-round" style="color:${n.type==='success'?'var(--success)':'var(--error)'}">${ico}</span>
-      <div style="flex:1"><div class="${canClick ? 'notif-title' : ''}">${n.text}</div><span style="font-size:0.72rem;color:var(--text-secondary)">${n.time.toLocaleTimeString()}</span>
+      <div style="flex:1"><div class="${canClick ? 'notif-title' : ''}">${n.text}</div><span style="font-size:0.72rem;color:var(--text-secondary)">${timeSince(n.time)}</span>
       ${canClick ? '<br><span style="font-size:0.7rem;color:var(--steel)">Click to view details</span>' : ''}</div></div>`;
-  }).reverse().join('');
+  }).join('');
+}
+function markNotifRead(i) {
+  if (STATE.notifHistory[i]) { STATE.notifHistory[i].read = true; saveNotifHistory(); renderNotifs(); updateNotifDot(); }
+}
+function timeSince(d) {
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff/60000); if (mins<1) return 'Just now'; if (mins<60) return `${mins}m ago`;
+  const hrs = Math.floor(mins/60); if (hrs<24) return `${hrs}h ago`;
+  const days = Math.floor(hrs/24); if (days<30) return `${days}d ago`;
+  return new Date(d).toLocaleDateString('en-UG',{day:'numeric',month:'short'});
 }
 function showNotifAppDetail(idx) {
   const n = STATE.notifHistory[idx];
@@ -774,7 +843,7 @@ function showNotifAppDetail(idx) {
   showMsg('info', n.text + (n.appData.applicationId ? ' (App #' + n.appData.applicationId + ')' : ''));
 }
 function clearNotifs() {
-  STATE.notifHistory = []; updateNotifDot(); renderNotifs();
+  STATE.notifHistory = []; saveNotifHistory(); updateNotifDot(); renderNotifs();
 }
 
 // ===== PASSWORD TOGGLE =====
@@ -801,11 +870,17 @@ let tfaPendingToken = null;
 function doLogin() {
   const nin = document.getElementById('loginNin').value.trim();
   const pw = document.getElementById('loginPass').value;
+  const remember = document.getElementById('loginRemember').checked;
   const errEl = document.getElementById('loginError'); errEl.textContent = '';
-  document.getElementById('loginBtn').disabled = true;
+  const btn = document.getElementById('loginBtn'); btn.disabled = true;
+  document.getElementById('loginBtnText').textContent = 'Verifying...';
+  document.getElementById('loginSpinner').style.display = 'inline-block';
   api('POST', '/auth/login', { nin, password: pw })
     .then(d => {
-      // Simulate 2FA — store token and show 2FA step
+      document.getElementById('loginBtnText').textContent = 'Sign in with UGPass';
+      document.getElementById('loginSpinner').style.display = 'none';
+      if (remember) localStorage.setItem('ugsp_remember_nin', nin);
+      else localStorage.removeItem('ugsp_remember_nin');
       tfaPendingToken = d.token;
       STATE.user = d;
       document.getElementById('loginBtn').style.display = 'none';
@@ -817,7 +892,7 @@ function doLogin() {
       showMsg('success','Verification code sent to your registered device');
     })
     .catch(e => { errEl.textContent = e.message; })
-    .finally(() => { document.getElementById('loginBtn').disabled = false; });
+    .finally(() => { document.getElementById('loginBtn').disabled = false; document.getElementById('loginBtnText').textContent = 'Sign in with UGPass'; document.getElementById('loginSpinner').style.display = 'none'; });
 }
 function tfaMove(el, next) {
   el.value = el.value.replace(/[^0-9]/g,'');
@@ -856,6 +931,7 @@ function enterApp() {
   updateSidebarAvatar(STATE.user);
   document.getElementById('dashName').textContent = STATE.user.name.split(' ')[0];
   document.getElementById('feedbackFab').style.display = 'flex';
+  loadNotifHistory();
   loadDashboard(); loadServices(); loadApplications(); loadProfile(); loadMinistries();
   loadDocuments(); loadPayments(); loadNews(); loadHelp(); loadSettingsActivity(); loadAbout();
 }
@@ -875,7 +951,7 @@ function doLogout() {
   document.getElementById('feedbackFab').style.display = 'none';
   document.getElementById('loginNin').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('loginError').textContent = '';
 }
-(function() { const t=localStorage.getItem('ugsp_token'),u=localStorage.getItem('ugsp_user'); if(t&&u){ STATE.token=t; STATE.user=JSON.parse(u); enterApp(); } })();
+(function() { const r=localStorage.getItem('ugsp_remember_nin'); if(r) document.getElementById('loginNin').value=r; const t=localStorage.getItem('ugsp_token'),u=localStorage.getItem('ugsp_user'); if(t&&u){ STATE.token=t; STATE.user=JSON.parse(u); enterApp(); } const h=location.hash.replace('#',''); if(h&&document.getElementById('page'+h.charAt(0).toUpperCase()+h.slice(1))) navigateTo(h); })();
 
 // ===== REGISTER =====
 function showRegister() { document.getElementById('registerPage').style.display='flex'; document.getElementById('loginPage').style.display='none'; document.getElementById('registerError').textContent=''; }
@@ -923,7 +999,9 @@ async function forgotStep3() {
 }
 
 // ===== NAVIGATION =====
+const PAGE_ALIASES = { 'services': 'services', 'catalogue': 'services' };
 function navigateTo(page) {
+  page = PAGE_ALIASES[page] || page;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const pg = document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1));
@@ -931,6 +1009,7 @@ function navigateTo(page) {
   const nav = document.querySelector(`.nav-item[data-page="${page}"]`);
   if (nav) nav.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
+  window.location.hash = page;
   if (page === 'map') setTimeout(initMap, 200);
   if (page === 'documents') loadDocuments();
   if (page === 'payments') loadPayments();
@@ -941,6 +1020,7 @@ function navigateTo(page) {
   if (page === 'settings') loadSettingsActivity();
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+window.addEventListener('hashchange', () => { const p = location.hash.replace('#',''); if (p && document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1))) navigateTo(p); });
 function toggleSidebarCollapse() {
   const layout = document.getElementById('appLayout');
   const btn = document.querySelector('.sidebar-collapse');
@@ -962,11 +1042,11 @@ async function loadDashboard() {
     const stats = [
       { icon:'grid_view', color:'#e3f2fd', iconBg:'#1565c0', value:cats.length, label:'Available Services', page:'services' },
       { icon:'description', color:'#e8f5e9', iconBg:'#2e7d32', value:apps.length, label:'My Applications', page:'applications' },
-      { icon:'check_circle', color:'#fff3e0', iconBg:'#e65100', value:approved, label:'Approved' },
-      { icon:'pending', color:'#f3e5f5', iconBg:'#7b1fa2', value:pending, label:'In Progress' },
+      { icon:'check_circle', color:'#fff3e0', iconBg:'#e65100', value:approved, label:'Approved', page:'applications', filter:'approved' },
+      { icon:'pending_actions', color:'#f3e5f5', iconBg:'#7b1fa2', value:pending, label:'In Progress', page:'applications', filter:'pending' },
     ];
     document.getElementById('statGrid').innerHTML = stats.map((s,i) => {
-      const clickable = s.page ? `onclick="navigateTo('${s.page}')" style="cursor:pointer"` : '';
+      const clickable = s.page ? `onclick="navigateTo('${s.page}');${s.filter ? `setTimeout(()=>filterAppsTable('${s.filter}'),100)` : ''}" style="cursor:pointer"` : '';
       return `<div class="card stat-card stat-click" ${clickable}><div class="stat-icon" style="background:${s.color};color:${s.iconBg}"><span class="material-icons-round">${s.icon}</span></div><div class="stat-value">${s.value}</div><div class="stat-label">${s.label}</div></div>`;
     }).join('');
     document.getElementById('featuredServices').innerHTML = cats.slice(0,4).map(s => renderServiceCard(s)).join('');
@@ -1024,9 +1104,22 @@ async function applyService() {
 }
 
 // ===== CHECKOUT =====
+const PAY_FIELD_CONFIG = {
+  mobile_money: { icon:'smartphone', fields:[{id:'payPhone',label:'Mobile Money Number',placeholder:'+256 700 000 000',type:'tel'}] },
+  card: { icon:'credit_card', fields:[{id:'payCardNum',label:'Card Number',placeholder:'4242 4242 4242 4242',type:'text'},{id:'payCardExp',label:'Expiry (MM/YY)',placeholder:'12/26',type:'text'},{id:'payCardCvv',label:'CVV',placeholder:'123',type:'text'}] },
+  bank: { icon:'account_balance', fields:[{id:'payBankName',label:'Bank Name',placeholder:'e.g. Stanbic Bank',type:'text'},{id:'payBankAcc',label:'Account Number',placeholder:'e.g. 9030001234567',type:'text'}] },
+};
+function updatePayFields(channel) {
+  document.querySelectorAll('.pay-channel').forEach(el => el.classList.toggle('selected', el.querySelector('input')?.value === channel));
+  document.querySelector(`input[name="channel"][value="${channel}"]`).checked = true;
+  const cfg = PAY_FIELD_CONFIG[channel];
+  if (!cfg) { document.getElementById('payFields').innerHTML = ''; return; }
+  document.getElementById('payFields').innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="material-icons-round" style="color:var(--steel)">${cfg.icon}</span><span style="font-weight:600;font-size:0.85rem;text-transform:capitalize">${channel.replace(/_/g,' ')} Details</span></div>` + cfg.fields.map(f => `<div class="form-group" style="margin-bottom:8px"><label>${f.label}</label><input type="${f.type}" id="${f.id}" placeholder="${f.placeholder}" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;transition:border-color var(--transition);background:#fafbfc" onfocus="this.style.borderColor='var(--steel)';this.style.background='white'" onblur="this.style.borderColor='var(--border)';this.style.background='#fafbfc'"></div>`).join('');
+}
 function openCheckout(service) {
   document.getElementById('checkoutSummary').innerHTML = `<div class="checkout-row"><span>${service.name}</span><span>UGX ${service.fee.toLocaleString()}</span></div><div class="checkout-row total"><span>Total</span><span>UGX ${service.fee.toLocaleString()}</span></div>`;
   document.getElementById('prnContainer').innerHTML = ''; document.getElementById('cartFooter').style.display = 'flex'; document.getElementById('checkoutBtn').style.display = 'inline-flex';
+  updatePayFields('mobile_money');
   openModal('cartModal');
 }
 async function doCheckout() {
@@ -1042,15 +1135,49 @@ async function doCheckout() {
 }
 
 // ===== APPLICATIONS =====
+let STATE_appFilter = '';
+function filterAppsTable(filter) { STATE_appFilter = filter; renderAppsTable(); }
 async function loadApplications() {
   try {
     const data = await api('GET','/applications');
-    const tbody = document.getElementById('appsTableBody'); const empty = document.getElementById('appsEmpty');
-    if (!data?.length) { tbody.innerHTML = ''; empty.style.display = 'block'; document.getElementById('appBadge').textContent = '0'; return; }
-    empty.style.display = 'none';
-    tbody.innerHTML = data.map(a => `<tr><td style="font-weight:600">#${a.id}</td><td>${a.service_name}</td><td style="font-size:0.8rem;color:var(--text-secondary)">${new Date(a.submitted_at).toLocaleDateString('en-UG',{day:'numeric',month:'short',year:'numeric'})}</td><td><span class="status-badge status-${a.status}">${a.status.replace(/_/g,' ')}</span></td><td><button class="btn btn-sm btn-ghost" onclick="showMsg('success','#${a.id}: ${a.status.replace(/_/g,' ')}')">View</button></td></tr>`).join('');
-    document.getElementById('appBadge').textContent = data.length;
+    window._allApps = data;
+    renderAppsTable();
   } catch(e) {}
+}
+function renderAppsTable() {
+  const data = window._allApps || [];
+  const tbody = document.getElementById('appsTableBody'); const empty = document.getElementById('appsEmpty');
+  const filtered = STATE_appFilter ? data.filter(a => STATE_appFilter === 'pending' ? (a.status==='submitted'||a.status==='under_review') : a.status===STATE_appFilter) : data;
+  if (!filtered.length) { tbody.innerHTML = ''; empty.style.display = 'block'; document.getElementById('appBadge').textContent = data.length; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = filtered.map(a => {
+    const canResume = a.status === 'submitted' || a.status === 'under_review';
+    const canEdit = a.status === 'draft';
+    const canDelete = a.status === 'draft' || a.status === 'submitted';
+    const actions = [];
+    if (canResume) actions.push(`<button class="btn btn-sm btn-ghost" onclick="showAppAction(${a.id},'resume')" title="Track progress"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">redo</span> Track</button>`);
+    if (canEdit) actions.push(`<button class="btn btn-sm btn-ghost" onclick="showAppAction(${a.id},'edit')"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">edit</span> Edit</button>`);
+    actions.push(`<button class="btn btn-sm btn-ghost" onclick="showAppAction(${a.id},'view')">View</button>`);
+    if (canDelete) actions.push(`<button class="btn btn-sm btn-danger" onclick="showAppAction(${a.id},'delete')" style="padding:4px 8px;font-size:0.72rem"><span class="material-icons-round" style="font-size:12px;vertical-align:middle">delete</span></button>`);
+    return `<tr><td style="font-weight:600">#${a.id}</td><td>${a.service_name}</td><td style="font-size:0.8rem;color:var(--text-secondary)">${new Date(a.submitted_at).toLocaleDateString('en-UG',{day:'numeric',month:'short',year:'numeric'})}</td><td><span class="status-badge status-${a.status}">${a.status.replace(/_/g,' ')}</span></td><td><div style="display:flex;gap:4px;flex-wrap:wrap">${actions.join('')}</div></td></tr>`;
+  }).join('');
+  document.getElementById('appBadge').textContent = data.length;
+}
+function showAppAction(id, action) {
+  const app = (window._allApps||[]).find(a => a.id === id);
+  if (!app) return;
+  if (action === 'view') {
+    const appData = window._allApps.find(a => a.id === id);
+    showMsg('success',`#${id}: ${appData.status.replace(/_/g,' ')} — ${appData.service_name}`);
+  } else if (action === 'resume') {
+    navigateTo('payments');
+  } else if (action === 'edit') {
+    showMsg('info',`Editing #${id}: ${app.service_name} (simulated)`);
+  } else if (action === 'delete') {
+    window._allApps = window._allApps.filter(a => a.id !== id);
+    renderAppsTable();
+    showMsg('success',`#${id} ${app.service_name} deleted`);
+  }
 }
 
 // ===== SEARCH =====
@@ -1239,6 +1366,11 @@ async function submitFeedback() {
     showMsg('success','Thank you for your feedback!');
     closeModal('feedbackModal');
   } catch(e) { showMsg('error','Could not submit feedback: ' + e.message); }
+}
+
+function showRefresh(elId) {
+  const el = document.getElementById(elId);
+  if (el) { el.classList.add('show'); el.textContent = 'Updated ' + new Date().toLocaleTimeString(); setTimeout(() => el.classList.remove('show'), 2500); }
 }
 
 // ===== DOCUMENTS =====
