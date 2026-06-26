@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UGSP — Unified Government Service Portal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇺🇬</text></svg>">
+<link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -389,21 +391,23 @@ tbody tr:hover{background:#f8fafc}
     <img class="coat-of-arms" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms">
     <h1>Unified Government Service Portal</h1>
     <p class="subtitle">Republic of Uganda — UGPass Single Sign-On</p>
+    <form id="loginForm" onsubmit="doLogin();return false" autocomplete="off">
     <div class="form-group"><label for="loginNin">National ID (NIN)</label><input type="text" id="loginNin" placeholder="e.g. T1234567890" autocomplete="username" aria-required="true"></div>
     <div class="form-group"><label for="loginPass">Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="UGPass password" autocomplete="current-password" aria-required="true"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('loginPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px"><label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="loginRemember" checked style="accent-color:var(--navy);width:16px;height:16px"> Remember me</label><a onclick="showForgotPassword()" style="font-size:0.78rem;color:var(--steel);cursor:pointer;font-weight:500">Forgot password?</a></div>
-    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()"><span id="loginBtnText">Sign in with UGPass</span><span id="loginSpinner" class="material-icons-round spin" style="display:none;font-size:1.1rem">hourglass_top</span></button>
+    <button type="submit" class="btn btn-primary" id="loginBtn"><span id="loginBtnText">Sign in with UGPass</span><span id="loginSpinner" class="material-icons-round spin" style="display:none;font-size:1.1rem">hourglass_top</span></button>
+    </form>
     <p class="login-error" id="loginError" role="alert"></p>
     <div class="tfa-section" id="tfaSection">
       <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px">Two-Factor Authentication</div>
       <div class="tfa-device"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">smartphone</span> Enter the 6-digit code sent to your registered device</div>
       <div class="tfa-code-inputs" id="tfaInputs">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,1)" onkeydown="tfaBack(this,0)" autofocus>
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,2)" onkeydown="tfaBack(this,1)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,3)" onkeydown="tfaBack(this,2)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,4)" onkeydown="tfaBack(this,3)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,5)" onkeydown="tfaBack(this,4)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaSubmitCheck()" onkeydown="tfaBack(this,5)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa1" oninput="tfaMove(this,1)" onkeydown="tfaBack(this,0)" autofocus>
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa2" oninput="tfaMove(this,2)" onkeydown="tfaBack(this,1)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa3" oninput="tfaMove(this,3)" onkeydown="tfaBack(this,2)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa4" oninput="tfaMove(this,4)" onkeydown="tfaBack(this,3)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa5" oninput="tfaMove(this,5)" onkeydown="tfaBack(this,4)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa6" oninput="tfaSubmitCheck()" onkeydown="tfaBack(this,5)">
       </div>
       <button class="btn btn-primary" id="tfaBtn" onclick="verify2FA()" disabled>Verify Code</button>
       <p style="font-size:0.75rem;color:var(--text-secondary);margin-top:6px">Code: <strong id="tfaDemoCode">------</strong> (demo)</p>
@@ -423,13 +427,15 @@ tbody tr:hover{background:#f8fafc}
     <h1>Create Account</h1>
     <p class="subtitle">Register for a UGSP account</p>
     <div id="registerError" class="login-error"></div>
-    <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="e.g. Grace Akello"></div>
-    <div class="form-group"><label>National ID (NIN)</label><input type="text" id="regNin" placeholder="e.g. T1234567890"></div>
-    <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="grace@example.com"></div>
-    <div class="form-group"><label>Phone</label><input type="text" id="regPhone" placeholder="+256 700 000 000"></div>
-    <div class="form-group"><label>Category</label><select id="regCategory"><option value="citizen">Citizen</option><option value="business">Business</option><option value="visitor">Visitor</option></select></div>
-    <div class="form-group"><label>Password</label><div class="pw-wrap"><input type="password" id="regPass" placeholder="Create a strong password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('regPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
-    <button class="btn btn-primary" id="regBtn" type="button" onclick="doRegister()">Create Account</button>
+    <form id="regForm" onsubmit="doRegister();return false">
+    <div class="form-group"><label for="regName">Full Name</label><input type="text" id="regName" placeholder="e.g. Grace Akello"></div>
+    <div class="form-group"><label for="regNin">National ID (NIN)</label><input type="text" id="regNin" placeholder="e.g. T1234567890"></div>
+    <div class="form-group"><label for="regEmail">Email</label><input type="email" id="regEmail" placeholder="grace@example.com"></div>
+    <div class="form-group"><label for="regPhone">Phone</label><input type="text" id="regPhone" placeholder="+256 700 000 000"></div>
+    <div class="form-group"><label for="regCategory">Category</label><select id="regCategory"><option value="citizen">Citizen</option><option value="business">Business</option><option value="visitor">Visitor</option></select></div>
+    <div class="form-group"><label for="regPass">Password</label><div class="pw-wrap"><input type="password" id="regPass" placeholder="Create a strong password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('regPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
+    <button class="btn btn-primary" id="regBtn" type="submit">Create Account</button>
+    </form>
     <p class="login-footer">Already have an account? <a class="auth-toggle" onclick="hideRegister()">Sign in</a></p>
   </div>
 </div>
@@ -441,10 +447,12 @@ tbody tr:hover{background:#f8fafc}
     <h1>Reset Password</h1>
     <p class="subtitle" id="forgotStep">Step 1: Enter your NIN</p>
     <div id="forgotError" class="login-error"></div>
-    <div class="form-group" id="forgotNinGroup"><label>National ID (NIN)</label><input type="text" id="forgotNin" placeholder="e.g. T1234567890"></div>
-    <div class="form-group" id="forgotCodeGroup" style="display:none"><label>Reset Code</label><input type="text" id="forgotCode" placeholder="Enter the code sent to you"></div>
-    <div class="form-group" id="forgotNewPassGroup" style="display:none"><label>New Password</label><div class="pw-wrap"><input type="password" id="forgotNewPass" placeholder="Enter new password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('forgotNewPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
-    <button class="btn btn-primary" id="forgotBtn" onclick="forgotStep2()">Send Reset Code</button>
+    <form id="forgotForm" onsubmit="forgotStep2();return false">
+    <div class="form-group" id="forgotNinGroup"><label for="forgotNin">National ID (NIN)</label><input type="text" id="forgotNin" placeholder="e.g. T1234567890"></div>
+    <div class="form-group" id="forgotCodeGroup" style="display:none"><label for="forgotCode">Reset Code</label><input type="text" id="forgotCode" placeholder="Enter the code sent to you"></div>
+    <div class="form-group" id="forgotNewPassGroup" style="display:none"><label for="forgotNewPass">New Password</label><div class="pw-wrap"><input type="password" id="forgotNewPass" placeholder="Enter new password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('forgotNewPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
+    <button class="btn btn-primary" id="forgotBtn" type="submit">Send Reset Code</button>
+    </form>
     <p class="login-footer"><a class="auth-toggle" onclick="hideForgotPassword()">Back to sign in</a></p>
   </div>
 </div>
@@ -626,7 +634,7 @@ tbody tr:hover{background:#f8fafc}
       <div class="page-header"><h2 data-i18n="nav.settings">Settings</h2><p data-i18n="pages.settings.subtitle">Manage your account settings and preferences.</p></div>
       <div class="page-2col">
         <div>
-          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">lock</span> Change Password</h4><div class="form-group"><label>Current Password</label><div class="pw-wrap"><input type="password" id="setCurPass" placeholder="Current password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setCurPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><div class="form-group"><label>New Password</label><div class="pw-wrap"><input type="password" id="setNewPass" placeholder="New password (min 6 chars)"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setNewPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><div class="form-group"><label>Confirm New Password</label><div class="pw-wrap"><input type="password" id="setConfirmPass" placeholder="Confirm new password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setConfirmPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><button class="btn btn-primary" onclick="changePassword()" style="width:auto">Update Password</button><p id="setPassMsg" class="login-error" style="margin-top:6px"></p></div>
+          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">lock</span> Change Password</h4><form id="setPassForm" onsubmit="changePassword();return false"><div class="form-group"><label for="setCurPass">Current Password</label><div class="pw-wrap"><input type="password" id="setCurPass" placeholder="Current password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setCurPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><div class="form-group"><label for="setNewPass">New Password</label><div class="pw-wrap"><input type="password" id="setNewPass" placeholder="New password (min 6 chars)"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setNewPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><div class="form-group"><label for="setConfirmPass">Confirm New Password</label><div class="pw-wrap"><input type="password" id="setConfirmPass" placeholder="Confirm new password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setConfirmPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><button class="btn btn-primary" type="submit" style="width:auto">Update Password</button><p id="setPassMsg" class="login-error" style="margin-top:6px"></p></form></div>
           <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">palette</span> Appearance</h4><div class="settings-row"><div><div class="sl-label">Language</div><div class="sl-desc">Choose your preferred language</div></div><select id="setLang" onchange="setLanguage(this.value)" style="padding:6px 10px;border:2px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.82rem"><option value="en">English</option><option value="lug">Luganda</option><option value="swa">Swahili</option><option value="luo">Luo (Acholi)</option><option value="nyk">Runyankole</option></select></div></div>
           <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">notifications</span> Notifications</h4><div class="settings-row"><div><div class="sl-label">Email Notifications</div><div class="sl-desc">Receive updates about your applications via email</div></div><label class="toggle"><input type="checkbox" checked id="setEmailNotif" onchange="savePrefs()"><span class="toggle-slider"></span></label></div><div class="settings-row"><div><div class="sl-label">SMS Notifications</div><div class="sl-desc">Receive SMS alerts for payment confirmations</div></div><label class="toggle"><input type="checkbox" checked id="setSmsNotif" onchange="savePrefs()"><span class="toggle-slider"></span></label></div></div>
         </div>
