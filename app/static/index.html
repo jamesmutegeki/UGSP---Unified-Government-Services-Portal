@@ -93,9 +93,8 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 /* Sidebar */
 .sidebar{width:var(--sidebar-w);background:var(--navy);color:white;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100;transition:transform var(--transition)}
 .sidebar-header{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.1);min-height:var(--top-h)}
-.sidebar-collapse{margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:4px;border-radius:4px;font-size:1.1rem;transition:color var(--transition),transform var(--transition)}
-.sidebar-collapse:hover{color:white;background:rgba(255,255,255,0.1)}
-.sidebar-collapse.collapsed{transform:rotate(180deg)}
+.sidebar-toggle{background:none;border:none;color:var(--text);cursor:pointer;padding:6px;border-radius:6px;font-size:1.4rem;display:flex;align-items:center;justify-content:center;transition:background var(--transition)}
+.sidebar-toggle:hover{background:rgba(0,0,0,0.05)}
 .sidebar-header .logo{width:38px;height:38px;flex-shrink:0;fill:var(--gold)}
 .sidebar-header .logo-text h2{font-size:0.9rem;font-weight:600;line-height:1.1}
 .sidebar-header .logo-text small{font-size:0.6rem;opacity:0.7;display:block}
@@ -251,7 +250,7 @@ tbody tr:hover{background:#f8fafc}
 @media(max-width:768px){
   .main-content{margin-left:0}
   .sidebar{position:fixed;z-index:101;transition:transform var(--duration-normal) var(--ease-out)}
-  .sidebar-collapse{display:flex !important}
+
   .app-layout.sidebar-collapsed .sidebar{transform:translateX(-100%)}
   .app-layout:not(.sidebar-collapsed) .sidebar{transform:translateX(0)}
   .sidebar-mobile-backdrop{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.3)}
@@ -551,7 +550,6 @@ tbody tr:hover{background:#f8fafc}
     <div class="sidebar-header">
       <img class="coa-sidebar" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms">
       <div class="logo-text"><h2>UGSP</h2><small>Government Portal</small></div>
-      <button class="sidebar-collapse material-icons-round" onclick="toggleSidebarCollapse()" title="Collapse sidebar" aria-label="Collapse sidebar">chevron_left</button>
     </div>
     <nav class="sidebar-nav">
       <button class="nav-item active" data-page="dashboard" data-i18n="nav.dashboard" onclick="navigateTo('dashboard')" aria-current="page"><span class="icon material-icons-round">dashboard</span> Dashboard</button>
@@ -577,6 +575,7 @@ tbody tr:hover{background:#f8fafc}
 
   <main class="main-content" id="main-content" tabindex="-1">
     <header class="top-bar">
+      <button class="sidebar-toggle material-icons-round" onclick="toggleSidebarCollapse()" id="sidebarToggle" title="Collapse sidebar" aria-label="Collapse sidebar">menu</button>
       <div class="search-bar" role="search"><span class="search-icon material-icons-round">search</span><input type="search" id="quickSearch" placeholder="Search services, ministries..." onkeydown="if(event.key==='Enter')quickSearchGo()" aria-label="Search"></div>
       <div class="top-bar-right"><button class="notif-btn material-icons-round" onclick="toggleNotifPanel()" aria-label="Notifications" id="notifBtn" aria-expanded="false">notifications<span class="notif-dot" id="notifDot"></span></button></div>
     </header>
@@ -1062,11 +1061,17 @@ function navigateTo(page) {
 window.addEventListener('hashchange', () => { const p = location.hash.replace('#',''); if (p && document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1))) navigateTo(p); });
 function toggleSidebarCollapse() {
   const layout = document.getElementById('appLayout');
-  const btn = document.querySelector('.sidebar-collapse');
+  const btn = document.getElementById('sidebarToggle');
   const backdrop = document.getElementById('sidebarBackdrop');
   const collapsed = layout.classList.toggle('sidebar-collapsed');
-  btn.classList.toggle('collapsed', collapsed);
-  btn.title = collapsed ? 'Show sidebar' : 'Collapse sidebar';
+  if (collapsed) {
+    document.querySelector('.sidebar').setAttribute('aria-hidden', 'true');
+  } else {
+    document.querySelector('.sidebar').removeAttribute('aria-hidden');
+    if (window.innerWidth <= 768) setTimeout(() => document.querySelector('.sidebar .nav-item').focus(), 150);
+  }
+  btn.title = collapsed ? 'Open sidebar' : 'Collapse sidebar';
+  btn.setAttribute('aria-label', btn.title);
   if (window.innerWidth <= 768) backdrop.classList.toggle('active', !collapsed);
 }
 (function() { const r=localStorage.getItem('ugsp_remember_nin'); if(r) document.getElementById('loginNin').value=r; const t=localStorage.getItem('ugsp_token'),u=localStorage.getItem('ugsp_user'); if(t&&u){ STATE.token=t; STATE.user=JSON.parse(u); enterApp(); } const h=location.hash.replace('#',''); if(h&&document.getElementById('page'+h.charAt(0).toUpperCase()+h.slice(1))) navigateTo(h); })();
@@ -1638,7 +1643,10 @@ updateOnlineStatus();
 initCategoryTabs();
 if (STATE.token) loadServices('all');
 // Start sidebar collapsed on mobile
-if (window.innerWidth <= 768) document.getElementById('appLayout').classList.add('sidebar-collapsed');
+if (window.innerWidth <= 768) {
+  document.getElementById('appLayout').classList.add('sidebar-collapsed');
+  document.querySelector('.sidebar').setAttribute('aria-hidden', 'true');
+}
 </script>
 </body>
 </html>

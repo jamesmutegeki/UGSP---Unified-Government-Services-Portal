@@ -448,7 +448,7 @@ async def mark_notifications_read(authorization: str = Header(None)):
 
 # --- Token verify & profile ---
 @router.get("/verify")
-async def verify_token(authorization: str = Header(None)):
+async def verify_auth_status(authorization: str = Header(None)):
     nin = verify_token(authorization)
     user = MOCK_USERS.get(nin)
     if not user:
