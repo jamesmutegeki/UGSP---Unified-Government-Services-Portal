@@ -21,6 +21,27 @@
   --shadow: 0 1px 3px rgba(12,45,94,0.08), 0 1px 2px rgba(12,45,94,0.06);
   --shadow-lg: 0 4px 16px rgba(12,45,94,0.12);
   --sidebar-w: 260px; --top-h: 64px; --transition: 0.2s ease;
+  /* State tokens */
+  --state-loading: color-mix(in srgb, var(--steel) 20%, transparent);
+  --state-error-bg: #fef2f2;
+  --state-error-border: #dc2626;
+  --state-error-text: #991b1b;
+  --state-success-bg: #f0fdf4;
+  --state-success-border: #16a34a;
+  --state-success-text: #166534;
+  --state-empty-bg: #f8f9fb;
+  --state-disabled: #9ca3af;
+  --state-disabled-bg: #e5e7eb;
+  /* Motion tokens */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Focus & skeleton */
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--steel) 40%, transparent);
+  --skeleton-from: #e5e7eb;
+  --skeleton-to: #f3f4f6;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;scroll-behavior:smooth}
@@ -191,12 +212,6 @@ tbody tr:hover{background:#f8fafc}
 .search-result h4{font-size:0.92rem;font-weight:600}
 .search-result .ministry{font-size:0.75rem;color:var(--steel)}
 .search-result p{font-size:0.82rem;color:var(--text-secondary);margin-top:3px}
-/* Messages */
-.msg{padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:10px;font-size:0.82rem;display:none;position:fixed;top:80px;right:20px;z-index:400;box-shadow:var(--shadow-lg);max-width:400px}
-.msg.show{display:block;animation:slideIn 0.3s ease}
-@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-.msg-success{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7}
-.msg-error{background:#fce4ec;color:#b71c1c;border:1px solid #ef9a9a}
 /* Empty state */
 .empty-state{text-align:center;padding:40px 20px;color:var(--text-secondary)}
 .empty-state .empty-icon{font-size:2.5rem;margin-bottom:10px;opacity:0.4}
@@ -235,10 +250,17 @@ tbody tr:hover{background:#f8fafc}
 /* Responsive */
 @media(max-width:768px){
   .main-content{margin-left:0}
+  .sidebar{position:fixed;z-index:101;transition:transform var(--duration-normal) var(--ease-out)}
+  .sidebar-collapse{display:flex !important}
+  .app-layout.sidebar-collapsed .sidebar{transform:translateX(-100%)}
+  .app-layout:not(.sidebar-collapsed) .sidebar{transform:translateX(0)}
+  .sidebar-mobile-backdrop{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.3)}
+  .sidebar-mobile-backdrop.active{display:block}
   .stat-grid{grid-template-columns:1fr 1fr}.service-grid,.ministry-grid{grid-template-columns:1fr}
   .payment-channels{grid-template-columns:1fr}.page{padding:14px}
   .login-card{padding:32px 24px}.notif-panel{width:100%;right:-100%}
   .map-container{height:320px}
+  .btn,.nav-item{min-height:44px}
 }
 @media(max-width:480px){
   .stat-grid{grid-template-columns:1fr}.stat-card{padding:14px}
@@ -246,6 +268,9 @@ tbody tr:hover{background:#f8fafc}
   .search-bar{max-width:100%}.login-card{padding:24px 18px;border-radius:16px}
   .modal{max-height:90vh}.modal-body{padding:14px 16px}
   .notif-panel{width:100%;right:-100%}
+  .form-group input,.form-group select{padding:12px 14px}
+  .page-2col{grid-template-columns:1fr}
+  .btn,.nav-item{min-height:44px}
 }
 /* Coat of arms logo */
 .coa-sidebar{width:36px;height:36px;object-fit:contain;flex-shrink:0;display:block}
@@ -257,6 +282,8 @@ tbody tr:hover{background:#f8fafc}
 .notif-item.clickable:hover{background:#f0f4f8}
 .notif-item.clickable .notif-title{font-weight:600;font-size:0.88rem}
 .notif-item.clickable .notif-sub{font-size:0.75rem;color:var(--text-secondary)}
+.notif-item.unread{background:#eef5fb;border-left:3px solid var(--steel)}
+.notif-item.read{opacity:0.75}
 /* Ministry SVG logo */
 .m-logo-svg{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:10px;overflow:hidden}
 .m-logo-svg svg{width:100%;height:100%}
@@ -395,10 +422,46 @@ tbody tr:hover{background:#f8fafc}
 /* Notification panel overlay */
 .notif-overlay{background:rgba(0,0,0,0.3);transition:opacity 0.3s ease;opacity:0}
 .notif-overlay.active{opacity:1;display:block}
+/* Global focus ring */
+:focus-visible{outline:none;box-shadow:var(--focus-ring);border-radius:var(--radius-sm)}
+/* Button loading state */
+.btn.is-loading .btn-label{opacity:0}
+.btn.is-loading::after{content:'';position:absolute;inset:0;margin:auto;width:20px;height:20px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite}
+.btn.is-loading{cursor:wait;pointer-events:none}
+/* Disabled state */
+.btn.is-disabled,.nav-item.is-disabled{opacity:0.5;cursor:not-allowed;pointer-events:none}
+/* Input error state */
+.form-group.has-error input,.form-group.has-error select{border-color:var(--state-error-border);background:var(--state-error-bg)}
+/* Field error message */
+.field-error{font-size:0.78rem;color:var(--state-error-text);margin-top:4px;display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--duration-normal) var(--ease-out)}
+.field-error.show{grid-template-rows:1fr}
+.field-error-inner{overflow:hidden}
+/* Card selected state */
+.card.is-selected,.service-card.is-selected{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-light)}
+/* Skeleton shimmer */
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton{background:linear-gradient(90deg,var(--skeleton-from) 25%,var(--skeleton-to) 50%,var(--skeleton-from) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-sm)}
+.skeleton-text{height:14px;width:60%;margin-bottom:8px}
+.skeleton-text:last-child{width:40%}
+.skeleton-card{height:120px;width:100%}
+.skeleton-avatar{width:40px;height:40px;border-radius:50%}
+/* Toast notification system */
+.toast-container{position:fixed;top:16px;right:16px;z-index:1001;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);font-size:0.85rem;font-weight:500;max-width:380px;pointer-events:auto;animation:toastIn 0.25s var(--ease-out);transition:opacity var(--duration-normal),transform var(--duration-normal)}
+.toast.toast-out{opacity:0;transform:translateX(100%)}
+.toast-success{background:var(--state-success-bg);color:var(--state-success-text);border:1px solid var(--state-success-border)}
+.toast-error{background:var(--state-error-bg);color:var(--state-error-text);border:1px solid var(--state-error-border)}
+.toast-info{background:#eef5fb;color:var(--navy);border:1px solid var(--steel-light)}
+.toast .toast-icon{font-size:1.2rem;flex-shrink:0}
+.toast .toast-close{background:none;border:none;cursor:pointer;margin-left:auto;padding:2px;opacity:0.6;font-size:1.1rem;line-height:1;color:inherit}
+.toast .toast-close:hover{opacity:1}
+@keyframes toastIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+
 </style>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
+<div id="offlineBar" style="display:none;position:sticky;top:0;z-index:9999;background:#fef3cd;color:#856404;text-align:center;padding:6px 16px;font-size:0.8rem;font-weight:500" role="alert">You are offline. Some features may be unavailable.</div>
 
 <!-- Login -->
 <div id="loginPage" class="login-page">
@@ -408,9 +471,9 @@ tbody tr:hover{background:#f8fafc}
     <img class="coat-of-arms" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms">
     <h1>Unified Government Service Portal</h1>
     <p class="subtitle">Republic of Uganda — UGPass Single Sign-On</p>
-    <form id="loginForm" onsubmit="doLogin();return false" autocomplete="off">
-    <div class="form-group"><label for="loginNin">National ID (NIN)</label><input type="text" id="loginNin" placeholder="e.g. T1234567890" autocomplete="username" aria-required="true"></div>
-    <div class="form-group"><label for="loginPass">Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="UGPass password" autocomplete="current-password" aria-required="true"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('loginPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
+    <form id="loginForm" onsubmit="doLogin();return false" autocomplete="off" novalidate>
+    <div class="form-group"><label for="loginNin">National ID (NIN)</label><input type="text" id="loginNin" placeholder="e.g. T1234567890" autocomplete="username" aria-required="true" aria-describedby="loginError"></div>
+    <div class="form-group"><label for="loginPass">Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="UGPass password" autocomplete="current-password" aria-required="true" aria-describedby="loginError"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('loginPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
     <div class="d-flex-between" style="margin:6px 0 14px"><label class="d-flex-center gap-sm" style="font-size:0.8rem;cursor:pointer"><input type="checkbox" id="loginRemember" checked style="accent-color:var(--navy);width:16px;height:16px"> Remember me</label><button type="button" class="btn-link" onclick="showForgotPassword()">Forgot password?</button></div>
     <button type="submit" class="btn btn-primary" id="loginBtn"><span id="loginBtnText">Sign in with UGPass</span><span id="loginSpinner" class="material-icons-round spin" style="display:none">hourglass_top</span></button>
     </form>
@@ -492,34 +555,34 @@ tbody tr:hover{background:#f8fafc}
     </div>
     <nav class="sidebar-nav">
       <button class="nav-item active" data-page="dashboard" data-i18n="nav.dashboard" onclick="navigateTo('dashboard')" aria-current="page"><span class="icon material-icons-round">dashboard</span> Dashboard</button>
-      <button class="nav-item" data-page="services" data-i18n="nav.services" onclick="navigateTo('services')"><span class="icon material-icons-round">grid_view</span> Services</button>
-      <button class="nav-item" data-page="search" data-i18n="nav.search" onclick="navigateTo('search')"><span class="icon material-icons-round">search</span> Search</button>
-      <button class="nav-item" data-page="documents" data-i18n="nav.documents" onclick="navigateTo('documents')"><span class="icon material-icons-round">folder</span> Documents</button>
-      <button class="nav-item" data-page="applications" data-i18n="nav.applications" onclick="navigateTo('applications')"><span class="icon material-icons-round">description</span> Applications <span class="badge" id="appBadge">0</span></button>
-      <button class="nav-item" data-page="payments" data-i18n="nav.payments" onclick="navigateTo('payments')"><span class="icon material-icons-round">account_balance_wallet</span> Payments</button>
-      <button class="nav-item" data-page="ministries" data-i18n="nav.ministries" onclick="navigateTo('ministries')"><span class="icon material-icons-round">account_balance</span> Ministries</button>
-      <button class="nav-item" data-page="map" data-i18n="nav.map" onclick="navigateTo('map')"><span class="icon material-icons-round">map</span> Service Map</button>
-      <button class="nav-item" data-page="news" data-i18n="nav.news" onclick="navigateTo('news')"><span class="icon material-icons-round">newspaper</span> News</button>
-      <button class="nav-item" data-page="help" data-i18n="nav.help" onclick="navigateTo('help')"><span class="icon material-icons-round">help</span> Help</button>
-      <button class="nav-item" data-page="profile" data-i18n="nav.profile" onclick="navigateTo('profile')"><span class="icon material-icons-round">person</span> Profile</button>
-      <button class="nav-item" data-page="activity" data-i18n="nav.activity" onclick="navigateTo('activity')"><span class="icon material-icons-round">history</span> Activity</button>
-      <button class="nav-item" data-page="about" data-i18n="nav.about" onclick="navigateTo('about')"><span class="icon material-icons-round">info</span> About</button>
-      <button class="nav-item" data-page="settings" data-i18n="nav.settings" onclick="navigateTo('settings')"><span class="icon material-icons-round">settings</span> Settings</button>
+      <button class="nav-item" data-page="services" data-i18n="nav.services" onclick="navigateTo('services')" aria-label="Services"><span class="icon material-icons-round" aria-hidden="true">grid_view</span> Services</button>
+      <button class="nav-item" data-page="search" data-i18n="nav.search" onclick="navigateTo('search')" aria-label="Search"><span class="icon material-icons-round" aria-hidden="true">search</span> Search</button>
+      <button class="nav-item" data-page="documents" data-i18n="nav.documents" onclick="navigateTo('documents')" aria-label="Documents"><span class="icon material-icons-round" aria-hidden="true">folder</span> Documents</button>
+      <button class="nav-item" data-page="applications" data-i18n="nav.applications" onclick="navigateTo('applications')" aria-label="Applications"><span class="icon material-icons-round" aria-hidden="true">description</span> Applications <span class="badge" id="appBadge" aria-label="Application count">0</span></button>
+      <button class="nav-item" data-page="payments" data-i18n="nav.payments" onclick="navigateTo('payments')" aria-label="Payments"><span class="icon material-icons-round" aria-hidden="true">account_balance_wallet</span> Payments</button>
+      <button class="nav-item" data-page="ministries" data-i18n="nav.ministries" onclick="navigateTo('ministries')" aria-label="Ministries"><span class="icon material-icons-round" aria-hidden="true">account_balance</span> Ministries</button>
+      <button class="nav-item" data-page="map" data-i18n="nav.map" onclick="navigateTo('map')" aria-label="Service Map"><span class="icon material-icons-round" aria-hidden="true">map</span> Service Map</button>
+      <button class="nav-item" data-page="news" data-i18n="nav.news" onclick="navigateTo('news')" aria-label="News"><span class="icon material-icons-round" aria-hidden="true">newspaper</span> News</button>
+      <button class="nav-item" data-page="help" data-i18n="nav.help" onclick="navigateTo('help')" aria-label="Help"><span class="icon material-icons-round" aria-hidden="true">help</span> Help</button>
+      <button class="nav-item" data-page="profile" data-i18n="nav.profile" onclick="navigateTo('profile')" aria-label="Profile"><span class="icon material-icons-round" aria-hidden="true">person</span> Profile</button>
+      <button class="nav-item" data-page="activity" data-i18n="nav.activity" onclick="navigateTo('activity')" aria-label="Activity"><span class="icon material-icons-round" aria-hidden="true">history</span> Activity</button>
+      <button class="nav-item" data-page="about" data-i18n="nav.about" onclick="navigateTo('about')" aria-label="About"><span class="icon material-icons-round" aria-hidden="true">info</span> About</button>
+      <button class="nav-item" data-page="settings" data-i18n="nav.settings" onclick="navigateTo('settings')" aria-label="Settings"><span class="icon material-icons-round" aria-hidden="true">settings</span> Settings</button>
     </nav>
+    <div class="sidebar-mobile-backdrop" id="sidebarBackdrop" onclick="toggleSidebarCollapse()"></div>
     <div class="sidebar-footer">
       <div class="user-info"><div class="user-avatar" id="userAvatar">G</div><div class="user-details"><div class="user-name" id="userName">Grace Akello</div><div class="user-nin" id="userNin">T1234567890</div></div><button class="logout-btn material-icons-round" onclick="doLogout()" aria-label="Sign out">logout</button></div>
     </div>
   </aside>
 
-  <main class="main-content" id="main-content">
+  <main class="main-content" id="main-content" tabindex="-1">
     <header class="top-bar">
       <div class="search-bar" role="search"><span class="search-icon material-icons-round">search</span><input type="search" id="quickSearch" placeholder="Search services, ministries..." onkeydown="if(event.key==='Enter')quickSearchGo()" aria-label="Search"></div>
-      <div class="top-bar-right"><button class="notif-btn material-icons-round" onclick="toggleNotifPanel()" aria-label="Notifications" id="notifBtn">notifications<span class="notif-dot" id="notifDot"></span></button></div>
+      <div class="top-bar-right"><button class="notif-btn material-icons-round" onclick="toggleNotifPanel()" aria-label="Notifications" id="notifBtn" aria-expanded="false">notifications<span class="notif-dot" id="notifDot"></span></button></div>
     </header>
 
-    <!-- Messages float top-right -->
-    <div class="msg msg-success" id="msgSuccess" role="alert"></div>
-    <div class="msg msg-error" id="msgError" role="alert"></div>
+    <!-- Toast notifications -->
+    <div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
 
     <!-- Feedback FAB -->
     <button class="feedback-fab material-icons-round" id="feedbackFab" onclick="openFeedback()" title="Send feedback" aria-label="Send feedback" style="display:none">feedback</button>
@@ -792,17 +855,21 @@ function saveNotifHistory() {
   localStorage.setItem('ugsp_notif_history', JSON.stringify(STATE.notifHistory.slice(0,100)));
 }
 function showMsg(type, text, appData) {
-  const el = type === 'success' ? document.getElementById('msgSuccess') : document.getElementById('msgError');
-  el.textContent = text; el.classList.add('show');
-  const id = setTimeout(() => { el.classList.remove('show'); }, 2000);
+  const container = document.getElementById('toastContainer');
+  const icons = { success:'check_circle', error:'error', info:'info' };
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.setAttribute('role', 'alert');
+  toast.innerHTML = `<span class="toast-icon material-icons-round">${icons[type]||'info'}</span><span>${text}</span><button class="toast-close material-icons-round" onclick="this.closest('.toast').classList.add('toast-out');setTimeout(()=>this.closest('.toast').remove(),250)" aria-label="Dismiss">close</button>`;
+  container.appendChild(toast);
+  const id = setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 250); }, 4000);
+  toast.addEventListener('mouseenter', () => clearTimeout(id));
   // Add to notification history
   STATE.notifHistory.push({ type, text, time: new Date(), appData, read: false });
   saveNotifHistory();
   updateNotifDot();
   // Also show on map if map page is active
-  if (document.getElementById('pageMap').classList.contains('active')) {
-    showMapNotif(text, type);
-  }
+  if (document.getElementById('pageMap').classList.contains('active')) showMapNotif(text, type);
   if (document.getElementById('notifPanel').classList.contains('open')) renderNotifs();
 }
 function updateNotifDot() {
@@ -813,9 +880,11 @@ function updateNotifDot() {
 function toggleNotifPanel() {
   const panel = document.getElementById('notifPanel');
   const overlay = document.getElementById('notifOverlay');
+  const btn = document.getElementById('notifBtn');
   const open = !panel.classList.contains('open');
   panel.classList.toggle('open', open);
   overlay.classList.toggle('active', open);
+  btn.setAttribute('aria-expanded', open);
   if (open) renderNotifs();
 }
 function closeNotifPanel() {
@@ -830,7 +899,7 @@ function getNotifIcon(text, type) {
 function renderNotifs() {
   const body = document.getElementById('notifBody');
   if (STATE.notifHistory.length === 0) {
-    body.innerHTML = '<div class="notif-empty"><div class="empty-icon material-icons-round" style="font-size:2rem">notifications_off</div><h4>No notifications</h4><p class="text-secondary text-sm mt-xs">No recent activity to show.</p></div>';
+    body.innerHTML = '<div class="notif-empty"><div class="empty-icon material-icons-round" aria-hidden="true" style="font-size:2rem">notifications_off</div><h4>No notifications</h4><p class="text-secondary text-sm mt-xs">No recent activity to show.</p></div>';
     return;
   }
   body.innerHTML = STATE.notifHistory.slice().reverse().map((n, ri) => {
@@ -839,7 +908,7 @@ function renderNotifs() {
     const canClick = n.appData && n.appData.applicationId;
     const isUnread = !n.read;
     const clickHandler = canClick ? `onclick="markNotifRead(${i});showNotifAppDetail(${i})"` : `onclick="markNotifRead(${i})"`;
-    return `<div class="notif-item ${canClick ? 'clickable' : ''}" ${clickHandler} tabindex="${canClick ? '0' : '-1'}" role="${canClick ? 'button' : ''}" style="${isUnread ? 'background:#eef5fb;border-left:3px solid var(--steel)' : 'opacity:0.75'}">
+    return `<div class="notif-item ${canClick ? 'clickable' : ''} ${isUnread ? 'unread' : 'read'}" ${clickHandler} tabindex="${canClick ? '0' : '-1'}" role="${canClick ? 'button' : ''}">
       <span class="notif-icon material-icons-round" style="color:${n.type==='success'?'var(--success)':'var(--error)'}">${ico}</span>
       <div style="flex:1"><div class="${canClick ? 'notif-title' : ''}">${n.text}</div><span style="font-size:0.72rem;color:var(--text-secondary)">${timeSince(n.time)}</span>
       ${canClick ? '<br><span style="font-size:0.7rem;color:var(--steel)">Click to view details</span>' : ''}</div></div>`;
@@ -994,9 +1063,11 @@ window.addEventListener('hashchange', () => { const p = location.hash.replace('#
 function toggleSidebarCollapse() {
   const layout = document.getElementById('appLayout');
   const btn = document.querySelector('.sidebar-collapse');
+  const backdrop = document.getElementById('sidebarBackdrop');
   const collapsed = layout.classList.toggle('sidebar-collapsed');
   btn.classList.toggle('collapsed', collapsed);
   btn.title = collapsed ? 'Show sidebar' : 'Collapse sidebar';
+  if (window.innerWidth <= 768) backdrop.classList.toggle('active', !collapsed);
 }
 (function() { const r=localStorage.getItem('ugsp_remember_nin'); if(r) document.getElementById('loginNin').value=r; const t=localStorage.getItem('ugsp_token'),u=localStorage.getItem('ugsp_user'); if(t&&u){ STATE.token=t; STATE.user=JSON.parse(u); enterApp(); } const h=location.hash.replace('#',''); if(h&&document.getElementById('page'+h.charAt(0).toUpperCase()+h.slice(1))) navigateTo(h); })();
 
@@ -1046,8 +1117,30 @@ async function forgotStep3() {
 }
 
 // ===== MODAL =====
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+let _lastFocused = null;
+function openModal(id) {
+  _lastFocused = document.activeElement;
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  const first = el.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if (first) setTimeout(() => first.focus(), 50);
+  el.addEventListener('keydown', _trapFocus);
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('active');
+  el.removeEventListener('keydown', _trapFocus);
+  if (_lastFocused) { _lastFocused.focus(); _lastFocused = null; }
+}
+function _trapFocus(e) {
+  if (e.key !== 'Tab') return;
+  const modal = e.currentTarget;
+  const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if (!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
 
 // ===== DASHBOARD =====
 async function loadDashboard() {
@@ -1063,7 +1156,7 @@ async function loadDashboard() {
     ];
     document.getElementById('statGrid').innerHTML = stats.map((s,i) => {
       const clickable = s.page ? `onclick="navigateTo('${s.page}');${s.filter ? `setTimeout(()=>filterAppsTable('${s.filter}'),100)` : ''}" style="cursor:pointer"` : '';
-      return `<div class="card stat-card stat-click" ${clickable}><div class="stat-icon" style="background:${s.color};color:${s.iconBg}"><span class="material-icons-round">${s.icon}</span></div><div class="stat-value">${s.value}</div><div class="stat-label">${s.label}</div></div>`;
+      return `<div class="card stat-card stat-click" ${clickable}><div class="stat-icon" style="background:${s.color};color:${s.iconBg}"><span class="material-icons-round" aria-hidden="true">${s.icon}</span></div><div class="stat-value">${s.value}</div><div class="stat-label">${s.label}</div></div>`;
     }).join('');
     document.getElementById('featuredServices').innerHTML = cats.slice(0,4).map(s => renderServiceCard(s)).join('');
   } catch(e) { showMsg('error','Failed to load dashboard'); }
@@ -1085,7 +1178,7 @@ function renderServiceCard(s) {
   const c = colors[s.id % colors.length], ic = ics[(s.id-1) % ics.length];
   const ft = s.fee === 0 ? '<span class="fee free">FREE</span>' : `<span class="fee">UGX ${s.fee.toLocaleString()}</span>`;
   const ics2 = ['#1565c0','#2e7d32','#e65100','#c62828','#7b1fa2','#00838f','#d84315','#283593'];
-  return `<div class="service-card" onclick="showServiceDetail(${s.id})" tabindex="0" role="button" aria-label="${s.name}"><div class="srv-icon" style="background:${c};color:${ics2[s.id%ics2.length]}"><span class="material-icons-round">${ic}</span></div><h4>${s.name}</h4><div class="ministry">${s.ministry}</div><p>${s.description}</p><div class="foot">${ft}<span style="font-size:0.75rem;color:var(--text-secondary)">${s.turnaround_days}d</span></div></div>`;
+  return `<div class="service-card" onclick="showServiceDetail(${s.id})" tabindex="0" role="button" aria-label="${s.name}"><div class="srv-icon" style="background:${c};color:${ics2[s.id%ics2.length]}"><span class="material-icons-round" aria-hidden="true">${ic}</span></div><h4>${s.name}</h4><div class="ministry">${s.ministry}</div><p>${s.description}</p><div class="foot">${ft}<span style="font-size:0.75rem;color:var(--text-secondary)">${s.turnaround_days}d</span></div></div>`;
 }
 function initCategoryTabs() {
   document.getElementById('catTabs').innerHTML = CATEGORIES.map(c => `<button class="cat-tab ${c==='all'?'active':''}" role="tab" aria-selected="${c==='all'}" onclick="switchCategory('${c}')">${c.charAt(0).toUpperCase()+c.slice(1)}</button>`).join('');
@@ -1532,9 +1625,20 @@ async function loadAbout() {
   } catch(e) { document.getElementById('aboutContent').innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">error_outline</div><h4>Failed to load</h4></div>'; }
 }
 
+// ===== ONLINE / OFFLINE =====
+function updateOnlineStatus() {
+  const bar = document.getElementById('offlineBar');
+  if (navigator.onLine) { bar.style.display = 'none'; } else { bar.style.display = 'block'; }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
 // ===== INIT =====
 initCategoryTabs();
 if (STATE.token) loadServices('all');
+// Start sidebar collapsed on mobile
+if (window.innerWidth <= 768) document.getElementById('appLayout').classList.add('sidebar-collapsed');
 </script>
 </body>
 </html>
