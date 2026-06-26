@@ -94,8 +94,7 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 /* Main */
 .main-content{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
 .top-bar{height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:50}
-.menu-toggle{display:none;background:none;border:none;cursor:pointer;color:var(--text);padding:6px;border-radius:4px}
-.menu-toggle:hover{background:var(--bg)}
+
 .search-bar{flex:1;max-width:440px;position:relative}
 .search-bar input{width:100%;padding:8px 14px 8px 40px;border-radius:24px;border:2px solid var(--border);font-family:inherit;font-size:0.85rem;background:var(--bg);transition:all var(--transition)}
 .search-bar input:focus{outline:none;border-color:var(--steel);background:white}
@@ -233,8 +232,7 @@ tbody tr:hover{background:#f8fafc}
 .login-card{scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
 /* Responsive */
 @media(max-width:768px){
-  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
-  .main-content{margin-left:0}.menu-toggle{display:block}
+  .main-content{margin-left:0}
   .stat-grid{grid-template-columns:1fr 1fr}.service-grid,.ministry-grid{grid-template-columns:1fr}
   .payment-channels{grid-template-columns:1fr}.page{padding:14px}
   .login-card{padding:32px 24px}.notif-panel{width:100%;right:-100%}
@@ -249,11 +247,9 @@ tbody tr:hover{background:#f8fafc}
 }
 /* Coat of arms logo */
 .coa-sidebar{width:36px;height:36px;object-fit:contain;flex-shrink:0;display:block}
-/* Global sidebar collapsed state — open always wins */
-.app-layout.sidebar-collapsed .sidebar:not(.open){transform:translateX(-100%)}
+/* Collapsed state — sidebar hides, main-content fills width */
+.app-layout.sidebar-collapsed .sidebar{transform:translateX(-100%)}
 .app-layout.sidebar-collapsed .main-content{margin-left:0}
-.app-layout.sidebar-collapsed .menu-toggle{display:block}
-@media(width>=769px){.app-layout.sidebar-collapsed .menu-toggle{display:block}}
 /* Clickable notification */
 .notif-item.clickable{padding:12px 20px;cursor:pointer;transition:background var(--transition)}
 .notif-item.clickable:hover{background:#f0f4f8}
@@ -492,7 +488,7 @@ tbody tr:hover{background:#f8fafc}
 
   <main class="main-content" id="main-content">
     <header class="top-bar">
-      <button class="menu-toggle material-icons-round" onclick="toggleSidebar()" aria-label="Toggle menu">menu</button>
+      
       <div class="search-bar" role="search"><span class="search-icon material-icons-round">search</span><input type="search" id="quickSearch" placeholder="Search services, ministries..." onkeydown="if(event.key==='Enter')quickSearchGo()" aria-label="Search"></div>
       <div class="top-bar-right"><button class="notif-btn material-icons-round" onclick="toggleNotifPanel()" aria-label="Notifications" id="notifBtn">notifications<span class="notif-dot" id="notifDot"></span></button></div>
     </header>
@@ -961,7 +957,6 @@ function navigateTo(page) {
   if (pg) pg.classList.add('active');
   const nav = document.querySelector(`.nav-item[data-page="${page}"]`);
   if (nav) nav.classList.add('active');
-  document.getElementById('sidebar').classList.remove('open');
   window.location.hash = page;
   if (page === 'map') setTimeout(initMap, 200);
   if (page === 'documents') loadDocuments();
@@ -972,7 +967,6 @@ function navigateTo(page) {
   if (page === 'about') loadAbout();
   if (page === 'settings') loadSettingsActivity();
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 window.addEventListener('hashchange', () => { const p = location.hash.replace('#',''); if (p && document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1))) navigateTo(p); });
 function toggleSidebarCollapse() {
   const layout = document.getElementById('appLayout');
