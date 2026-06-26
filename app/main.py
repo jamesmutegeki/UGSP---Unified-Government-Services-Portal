@@ -32,7 +32,6 @@ app.include_router(payments.router)
 app.include_router(uploads_router)
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
-UPLOADS_DIR = STATIC_DIR / "uploads"
 
 
 @app.get("/api/health")
@@ -51,5 +50,4 @@ async def service_worker():
                         headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"})
 
 
-app.mount("/static/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")

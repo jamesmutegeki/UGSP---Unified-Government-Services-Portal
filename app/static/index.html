@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UGSP — Unified Government Service Portal</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇺🇬</text></svg>">
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/static/manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -203,7 +203,7 @@ tbody tr:hover{background:#f8fafc}
 .empty-state h4{font-weight:600;margin-bottom:3px}
 .empty-state p{font-size:0.82rem}
 /* Loading */
-.spin{animation:spin 1s linear infinite}
+.spin{animation:spin 1s linear infinite;font-size:1.1rem}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-overlay{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--text-secondary);gap:8px}
 /* Ministries */
@@ -378,6 +378,23 @@ tbody tr:hover{background:#f8fafc}
 .page-header h2{letter-spacing:-0.015em}
 .refresh-indicator{font-size:0.7rem;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;opacity:0;transition:opacity 0.3s}
 .refresh-indicator.show{opacity:1}
+.overlay-page{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center}
+/* Utility classes */
+.d-flex{display:flex}.d-flex-center{display:flex;align-items:center}.d-flex-between{display:flex;align-items:center;justify-content:space-between}
+.d-grid{display:grid}.gap-xs{gap:4px}.gap-sm{gap:8px}.gap-md{gap:12px}.gap-lg{gap:16px}
+.mt-xs{margin-top:4px}.mt-sm{margin-top:8px}.mt-md{margin-top:12px}.mt-lg{margin-top:16px}
+.mb-xs{margin-bottom:4px}.mb-sm{margin-bottom:8px}.mb-md{margin-bottom:12px}.mb-lg{margin-bottom:16px}
+.text-secondary{color:var(--text-secondary)}.text-sm{font-size:0.82rem}.text-xs{font-size:0.72rem}
+.fw-500{font-weight:500}.fw-600{font-weight:600}.fw-700{font-weight:700}
+.w-full{width:100%}.flex-1{flex:1}.flex-shrink-0{flex-shrink:0}
+.text-center{text-align:center}.text-left{text-align:left}
+.overflow-hidden{overflow:hidden}.pos-relative{position:relative}
+.btn-link{background:none;border:none;color:var(--steel);cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:500;padding:0}
+.btn-link:hover{text-decoration:underline}
+.login-logo{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+/* Notification panel overlay */
+.notif-overlay{background:rgba(0,0,0,0.3);transition:opacity 0.3s ease;opacity:0}
+.notif-overlay.active{opacity:1;display:block}
 </style>
 </head>
 <body>
@@ -394,32 +411,32 @@ tbody tr:hover{background:#f8fafc}
     <form id="loginForm" onsubmit="doLogin();return false" autocomplete="off">
     <div class="form-group"><label for="loginNin">National ID (NIN)</label><input type="text" id="loginNin" placeholder="e.g. T1234567890" autocomplete="username" aria-required="true"></div>
     <div class="form-group"><label for="loginPass">Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="UGPass password" autocomplete="current-password" aria-required="true"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('loginPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px"><label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;cursor:pointer"><input type="checkbox" id="loginRemember" checked style="accent-color:var(--navy);width:16px;height:16px"> Remember me</label><a onclick="showForgotPassword()" style="font-size:0.78rem;color:var(--steel);cursor:pointer;font-weight:500">Forgot password?</a></div>
-    <button type="submit" class="btn btn-primary" id="loginBtn"><span id="loginBtnText">Sign in with UGPass</span><span id="loginSpinner" class="material-icons-round spin" style="display:none;font-size:1.1rem">hourglass_top</span></button>
+    <div class="d-flex-between" style="margin:6px 0 14px"><label class="d-flex-center gap-sm" style="font-size:0.8rem;cursor:pointer"><input type="checkbox" id="loginRemember" checked style="accent-color:var(--navy);width:16px;height:16px"> Remember me</label><button type="button" class="btn-link" onclick="showForgotPassword()">Forgot password?</button></div>
+    <button type="submit" class="btn btn-primary" id="loginBtn"><span id="loginBtnText">Sign in with UGPass</span><span id="loginSpinner" class="material-icons-round spin" style="display:none">hourglass_top</span></button>
     </form>
     <p class="login-error" id="loginError" role="alert"></p>
     <div class="tfa-section" id="tfaSection">
-      <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px">Two-Factor Authentication</div>
+      <div class="fw-600" style="font-size:0.85rem;margin-bottom:4px">Two-Factor Authentication</div>
       <div class="tfa-device"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">smartphone</span> Enter the 6-digit code sent to your registered device</div>
       <div class="tfa-code-inputs" id="tfaInputs">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa1" oninput="tfaMove(this,1)" onkeydown="tfaBack(this,0)" autofocus>
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa2" oninput="tfaMove(this,2)" onkeydown="tfaBack(this,1)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa3" oninput="tfaMove(this,3)" onkeydown="tfaBack(this,2)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa4" oninput="tfaMove(this,4)" onkeydown="tfaBack(this,3)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa5" oninput="tfaMove(this,5)" onkeydown="tfaBack(this,4)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" name="tfa6" oninput="tfaSubmitCheck()" onkeydown="tfaBack(this,5)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,1)" onkeydown="tfaBack(this,0)" autofocus>
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,2)" onkeydown="tfaBack(this,1)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,3)" onkeydown="tfaBack(this,2)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,4)" onkeydown="tfaBack(this,3)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,5)" onkeydown="tfaBack(this,4)">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaSubmitCheck()" onkeydown="tfaBack(this,5)">
       </div>
       <button class="btn btn-primary" id="tfaBtn" onclick="verify2FA()" disabled>Verify Code</button>
-      <p style="font-size:0.75rem;color:var(--text-secondary);margin-top:6px">Code: <strong id="tfaDemoCode">------</strong> (demo)</p>
+      <p class="text-secondary text-xs mt-sm">Code: <strong id="tfaDemoCode">------</strong> (demo)</p>
     </div>
     <div class="separator">or</div>
-    <button class="btn btn-secondary" style="width:100%" onclick="showRegister()">Create an Account</button>
+    <button type="button" class="btn btn-secondary w-full" onclick="showRegister()">Create an Account</button>
     <p class="login-footer">Demo: <strong>T1234567890</strong> / pass123 &middot; Powered by <strong>UGPass</strong></p>
   </div>
 </div>
 
 <!-- Register -->
-<div id="registerPage" style="display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center">
+<div id="registerPage" class="overlay-page">
   <div class="ken-burns-bg"></div>
   <div class="login-overlay"></div>
   <div class="login-card" style="width:480px;max-height:90vh;overflow-y:auto;border-radius:20px">
@@ -428,12 +445,12 @@ tbody tr:hover{background:#f8fafc}
     <p class="subtitle">Register for a UGSP account</p>
     <div id="registerError" class="login-error"></div>
     <form id="regForm" onsubmit="doRegister();return false">
-    <div class="form-group"><label for="regName">Full Name</label><input type="text" id="regName" placeholder="e.g. Grace Akello"></div>
-    <div class="form-group"><label for="regNin">National ID (NIN)</label><input type="text" id="regNin" placeholder="e.g. T1234567890"></div>
-    <div class="form-group"><label for="regEmail">Email</label><input type="email" id="regEmail" placeholder="grace@example.com"></div>
-    <div class="form-group"><label for="regPhone">Phone</label><input type="text" id="regPhone" placeholder="+256 700 000 000"></div>
+    <div class="form-group"><label for="regName">Full Name</label><input type="text" id="regName" placeholder="e.g. Grace Akello" required></div>
+    <div class="form-group"><label for="regNin">National ID (NIN)</label><input type="text" id="regNin" placeholder="e.g. T1234567890" required></div>
+    <div class="form-group"><label for="regEmail">Email</label><input type="email" id="regEmail" placeholder="grace@example.com" required></div>
+    <div class="form-group"><label for="regPhone">Phone</label><input type="text" id="regPhone" placeholder="+256 700 000 000" required></div>
     <div class="form-group"><label for="regCategory">Category</label><select id="regCategory"><option value="citizen">Citizen</option><option value="business">Business</option><option value="visitor">Visitor</option></select></div>
-    <div class="form-group"><label for="regPass">Password</label><div class="pw-wrap"><input type="password" id="regPass" placeholder="Create a strong password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('regPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
+    <div class="form-group"><label for="regPass">Password</label><div class="pw-wrap"><input type="password" id="regPass" placeholder="Create a strong password (min 6 chars)" required><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('regPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
     <button class="btn btn-primary" id="regBtn" type="submit">Create Account</button>
     </form>
     <p class="login-footer">Already have an account? <a class="auth-toggle" onclick="hideRegister()">Sign in</a></p>
@@ -441,16 +458,16 @@ tbody tr:hover{background:#f8fafc}
 </div>
 
 <!-- Forgot Password -->
-<div id="forgotPage" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.6);align-items:center;justify-content:center">
-  <div class="login-card" style="width:420px">
-    <div class="login-logo" style="width:60px;height:60px;font-size:28px;background:var(--gold);color:var(--navy)">&#128274;</div>
+<div id="forgotPage" class="overlay-page" style="background:rgba(0,0,0,0.6)">
+  <div class="login-card" style="width:420px;text-align:center">
+    <div class="login-logo" style="font-size:28px;background:var(--gold);color:var(--navy)">&#128274;</div>
     <h1>Reset Password</h1>
     <p class="subtitle" id="forgotStep">Step 1: Enter your NIN</p>
     <div id="forgotError" class="login-error"></div>
     <form id="forgotForm" onsubmit="forgotStep2();return false">
-    <div class="form-group" id="forgotNinGroup"><label for="forgotNin">National ID (NIN)</label><input type="text" id="forgotNin" placeholder="e.g. T1234567890"></div>
-    <div class="form-group" id="forgotCodeGroup" style="display:none"><label for="forgotCode">Reset Code</label><input type="text" id="forgotCode" placeholder="Enter the code sent to you"></div>
-    <div class="form-group" id="forgotNewPassGroup" style="display:none"><label for="forgotNewPass">New Password</label><div class="pw-wrap"><input type="password" id="forgotNewPass" placeholder="Enter new password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('forgotNewPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
+    <div class="form-group" id="forgotNinGroup"><label for="forgotNin">National ID (NIN)</label><input type="text" id="forgotNin" placeholder="e.g. T1234567890" required></div>
+    <div class="form-group" id="forgotCodeGroup" style="display:none"><label for="forgotCode">Reset Code</label><input type="text" id="forgotCode" placeholder="Enter the code sent to you" required></div>
+    <div class="form-group" id="forgotNewPassGroup" style="display:none"><label for="forgotNewPass">New Password</label><div class="pw-wrap"><input type="password" id="forgotNewPass" placeholder="Enter new password (min 6 chars)" required><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('forgotNewPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
     <button class="btn btn-primary" id="forgotBtn" type="submit">Send Reset Code</button>
     </form>
     <p class="login-footer"><a class="auth-toggle" onclick="hideForgotPassword()">Back to sign in</a></p>
@@ -459,11 +476,11 @@ tbody tr:hover{background:#f8fafc}
 
 <!-- Notif overlay -->
 <div class="notif-overlay" id="notifOverlay" onclick="closeNotifPanel()"></div>
-<div class="notif-panel" id="notifPanel">
-  <div class="notif-panel-header"><h3>Notifications</h3><button class="modal-close" onclick="closeNotifPanel()">&times;</button></div>
-  <div class="notif-panel-body" id="notifBody"><div class="notif-empty"><div class="empty-icon material-icons-round" style="font-size:2rem">notifications_off</div><h4>No notifications</h4></div></div>
-  <div style="padding:10px 20px;border-top:1px solid var(--border)"><button class="btn btn-sm btn-secondary" style="width:100%" onclick="clearNotifs()">Mark all as read</button></div>
-</div>
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-panel-header"><h3>Notifications</h3><button class="modal-close" onclick="closeNotifPanel()">&times;</button></div>
+    <div class="notif-panel-body" id="notifBody"></div>
+    <div style="padding:10px 20px;border-top:1px solid var(--border)"><button class="btn btn-sm btn-secondary w-full" onclick="clearNotifs()">Mark all as read</button></div>
+  </div>
 
 <!-- App -->
 <div id="appLayout" class="app-layout">
@@ -496,7 +513,6 @@ tbody tr:hover{background:#f8fafc}
 
   <main class="main-content" id="main-content">
     <header class="top-bar">
-      
       <div class="search-bar" role="search"><span class="search-icon material-icons-round">search</span><input type="search" id="quickSearch" placeholder="Search services, ministries..." onkeydown="if(event.key==='Enter')quickSearchGo()" aria-label="Search"></div>
       <div class="top-bar-right"><button class="notif-btn material-icons-round" onclick="toggleNotifPanel()" aria-label="Notifications" id="notifBtn">notifications<span class="notif-dot" id="notifDot"></span></button></div>
     </header>
@@ -662,18 +678,18 @@ tbody tr:hover{background:#f8fafc}
 
 <!-- Feedback Modal -->
 <div class="modal-overlay" id="feedbackModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle" style="width:440px"><div class="modal-header"><h3 id="feedbackTitle">Send Feedback</h3><button class="modal-close material-icons-round" onclick="closeModal('feedbackModal')" aria-label="Close">close</button></div><div class="modal-body">
-  <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px">Help us improve the UGSP. Your feedback is valuable.</p>
-  <div style="margin-bottom:12px"><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:4px">Category</label><select id="feedbackCategory" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem"><option value="general">General Feedback</option><option value="bug">Bug Report</option><option value="feature">Feature Request</option><option value="service">Service Issue</option><option value="accessibility">Accessibility</option></select></div>
-  <div style="margin-bottom:10px"><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:4px">Rating</label><div class="feedback-rating" id="feedbackRating">${[1,2,3,4,5].map(i => `<span class="feedback-star material-icons-round" data-star="${i}" onclick="setFeedbackRating(${i})">star</span>`).join('')}</div></div>
-  <div><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:4px">Your Message</label><textarea id="feedbackMessage" rows="4" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;resize:vertical" placeholder="Describe your experience or suggestion..."></textarea></div>
-  <div style="margin-top:4px;font-size:0.72rem;color:var(--text-secondary)">All feedback is anonymous unless you provide contact details.</div>
+  <p class="text-sm text-secondary mb-md">Help us improve the UGSP. Your feedback is valuable.</p>
+  <div class="mb-md"><label class="fw-600" style="font-size:0.82rem;display:block;margin-bottom:4px">Category</label><select id="feedbackCategory" class="w-full" style="padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem"><option value="general">General Feedback</option><option value="bug">Bug Report</option><option value="feature">Feature Request</option><option value="service">Service Issue</option><option value="accessibility">Accessibility</option></select></div>
+  <div class="mb-sm"><label class="fw-600" style="font-size:0.82rem;display:block;margin-bottom:4px">Rating</label><div class="feedback-rating" id="feedbackRating">${[1,2,3,4,5].map(i => `<span class="feedback-star material-icons-round" data-star="${i}" onclick="setFeedbackRating(${i})">star</span>`).join('')}</div></div>
+  <div><label class="fw-600" style="font-size:0.82rem;display:block;margin-bottom:4px">Your Message</label><textarea id="feedbackMessage" rows="4" class="w-full" style="padding:10px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;resize:vertical" placeholder="Describe your experience or suggestion..."></textarea></div>
+  <div class="text-xs text-secondary mt-xs">All feedback is anonymous unless you provide contact details.</div>
 </div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('feedbackModal')">Cancel</button><button class="btn btn-primary" onclick="submitFeedback()">Submit Feedback</button></div></div></div>
 
 <!-- Service Modal -->
 <div class="modal-overlay" id="serviceModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><h3 id="modalTitle">Service Details</h3><button class="modal-close material-icons-round" onclick="closeModal('serviceModal')" aria-label="Close">close</button></div><div class="modal-body" id="serviceModalBody"></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('serviceModal')">Cancel</button><button class="btn btn-primary" id="applyBtn" onclick="applyService()">Apply Now</button></div></div></div>
 
 <!-- Cart Modal -->
-<div class="modal-overlay" id="cartModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="cartTitle"><div class="modal-header"><h3 id="cartTitle">Checkout</h3><button class="modal-close material-icons-round" onclick="closeModal('cartModal')" aria-label="Close">close</button></div><div class="modal-body"><div class="checkout-summary" id="checkoutSummary"></div><label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:8px">Payment Channel</label><div class="payment-channels"><label class="pay-channel selected" onclick="updatePayFields('mobile_money')"><input type="radio" name="channel" value="mobile_money" checked><span class="chan-label">Mobile Money</span></label><label class="pay-channel" onclick="updatePayFields('card')"><input type="radio" name="channel" value="card"><span class="chan-label">Card Payment</span></label><label class="pay-channel" onclick="updatePayFields('bank')"><input type="radio" name="channel" value="bank"><span class="chan-label">Bank Transfer</span></label></div><div id="payFields" style="margin-top:12px"></div><div id="prnContainer"></div></div><div class="modal-footer" id="cartFooter"><button class="btn btn-secondary" onclick="closeModal('cartModal')">Close</button><button class="btn btn-success" id="checkoutBtn" onclick="doCheckout()">Generate PRN</button></div></div></div>
+<div class="modal-overlay" id="cartModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="cartTitle"><div class="modal-header"><h3 id="cartTitle">Checkout</h3><button class="modal-close material-icons-round" onclick="closeModal('cartModal')" aria-label="Close">close</button></div><div class="modal-body"><div class="checkout-summary" id="checkoutSummary"></div><label class="fw-600" style="font-size:0.82rem;display:block;margin-bottom:8px">Payment Channel</label><div class="payment-channels"><label class="pay-channel selected" onclick="updatePayFields('mobile_money')"><input type="radio" name="channel" value="mobile_money" checked><span class="chan-label">Mobile Money</span></label><label class="pay-channel" onclick="updatePayFields('card')"><input type="radio" name="channel" value="card"><span class="chan-label">Card Payment</span></label><label class="pay-channel" onclick="updatePayFields('bank')"><input type="radio" name="channel" value="bank"><span class="chan-label">Bank Transfer</span></label></div><div id="payFields" class="mt-md"></div><div id="prnContainer"></div></div><div class="modal-footer" id="cartFooter"><button class="btn btn-secondary" onclick="closeModal('cartModal')">Close</button><button class="btn btn-success" id="checkoutBtn" onclick="doCheckout()">Generate PRN</button></div></div></div>
 
 <script>
 // ===== STATE =====
@@ -814,7 +830,7 @@ function getNotifIcon(text, type) {
 function renderNotifs() {
   const body = document.getElementById('notifBody');
   if (STATE.notifHistory.length === 0) {
-    body.innerHTML = '<div class="notif-empty"><div class="empty-icon material-icons-round" style="font-size:2rem">notifications_off</div><h4>No notifications</h4><p>No recent activity to show.</p></div>';
+    body.innerHTML = '<div class="notif-empty"><div class="empty-icon material-icons-round" style="font-size:2rem">notifications_off</div><h4>No notifications</h4><p class="text-secondary text-sm mt-xs">No recent activity to show.</p></div>';
     return;
   }
   body.innerHTML = STATE.notifHistory.slice().reverse().map((n, ri) => {
@@ -877,26 +893,25 @@ function doLogin() {
   const remember = document.getElementById('loginRemember').checked;
   const errEl = document.getElementById('loginError'); errEl.textContent = '';
   const btn = document.getElementById('loginBtn'); btn.disabled = true;
-  document.getElementById('loginBtnText').textContent = 'Verifying...';
-  document.getElementById('loginSpinner').style.display = 'inline-block';
+  btn.querySelector('#loginBtnText').textContent = 'Verifying...';
+  btn.querySelector('#loginSpinner').style.display = 'inline-block';
   api('POST', '/auth/login', { nin, password: pw })
     .then(d => {
-      document.getElementById('loginBtnText').textContent = 'Sign in with UGPass';
-      document.getElementById('loginSpinner').style.display = 'none';
+      btn.querySelector('#loginBtnText').textContent = 'Sign in with UGPass';
+      btn.querySelector('#loginSpinner').style.display = 'none';
       if (remember) localStorage.setItem('ugsp_remember_nin', nin);
       else localStorage.removeItem('ugsp_remember_nin');
       tfaPendingToken = d.token;
       STATE.user = d;
-      document.getElementById('loginBtn').style.display = 'none';
+      btn.style.display = 'none';
       document.querySelector('.separator').style.display = 'none';
-      document.querySelector('[onclick="showRegister()"]').style.display = 'none';
+      document.querySelector('.w-full[onclick="showRegister()"]').style.display = 'none';
       document.getElementById('tfaSection').classList.add('active');
       document.getElementById('tfaInputs').querySelector('input').focus();
       document.getElementById('tfaDemoCode').textContent = d.demo_2fa_code || '123456';
       showMsg('success','Verification code sent to your registered device');
     })
-    .catch(e => { errEl.textContent = e.message; })
-    .finally(() => { document.getElementById('loginBtn').disabled = false; document.getElementById('loginBtnText').textContent = 'Sign in with UGPass'; document.getElementById('loginSpinner').style.display = 'none'; });
+    .catch(e => { errEl.textContent = e.message; btn.disabled = false; btn.querySelector('#loginBtnText').textContent = 'Sign in with UGPass'; btn.querySelector('#loginSpinner').style.display = 'none'; });
 }
 function tfaMove(el, next) {
   el.value = el.value.replace(/[^0-9]/g,'');
@@ -945,7 +960,7 @@ function doLogout() {
   document.getElementById('tfaSection').classList.remove('active');
   document.getElementById('loginBtn').style.display = 'inline-flex';
   document.querySelector('.separator').style.display = 'flex';
-  document.querySelector('[onclick="showRegister()"]').style.display = 'inline-flex';
+  document.querySelector('.w-full[onclick="showRegister()"]').style.display = 'inline-flex';
   document.querySelectorAll('#tfaInputs input').forEach(i => i.value = '');
   document.getElementById('tfaBtn').disabled = true;
   document.getElementById('loginPage').style.display = 'flex';

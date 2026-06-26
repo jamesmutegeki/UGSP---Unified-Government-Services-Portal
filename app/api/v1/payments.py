@@ -3,6 +3,8 @@ from datetime import datetime
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 
+from app.core.auth import verify_token
+
 router = APIRouter(prefix="/payments", tags=["payments"])
 
 PAYMENTS_DB: list[dict] = []
@@ -14,24 +16,12 @@ class CheckoutRequest(BaseModel):
     channel: str = "mobile_money"
 
 
-def _get_user_nin(authorization: str | None) -> str:
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    token = authorization.replace("Bearer ", "", 1)
-    if not token.startswith("ugpass_"):
-        raise HTTPException(status_code=401, detail="Invalid token")
-    parts = token.replace("ugpass_", "", 1).split("_", 1)
-    if len(parts) < 1 or len(parts[0]) < 10:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return parts[0]
-
-
 @router.post("/checkout")
 async def checkout(
     req: CheckoutRequest,
     authorization: str = Header(None),
 ):
-    nin = _get_user_nin(authorization)
+    nin = verify_token(authorization)
     prn = f"UG{datetime.utcnow().strftime('%Y%m%d')}{uuid.uuid4().hex[:8].upper()}"
 
     payment = {

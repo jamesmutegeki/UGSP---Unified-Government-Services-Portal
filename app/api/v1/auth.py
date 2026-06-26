@@ -6,6 +6,8 @@ from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 
+from app.core.auth import verify_token
+
 from ..v1.payments import PAYMENTS_DB as GLOBAL_PAYMENTS
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -169,18 +171,6 @@ FEEDBACK_DB: list[dict] = []
 REGISTER_COUNTER = len(MOCK_USERS)
 
 
-def _verify(authorization: str | None) -> str:
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    token = authorization.replace("Bearer ", "", 1)
-    if not token.startswith("ugpass_"):
-        raise HTTPException(status_code=401, detail="Invalid token")
-    parts = token.replace("ugpass_", "", 1).split("_", 1)
-    if len(parts) < 1 or len(parts[0]) < 10:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return parts[0]
-
-
 # --- Login ---
 @router.post("/login")
 async def login(req: LoginRequest):
@@ -300,7 +290,7 @@ DOCUMENT_TEMPLATES = {
 
 @router.get("/documents")
 async def get_documents(authorization: str = Header(None)):
-    nin = _verify(authorization)
+    nin = verify_token(authorization)
     docs = MOCK_DOCUMENTS.get(nin) or DOCUMENT_TEMPLATES.get(nin, [])
     return docs
 
@@ -321,14 +311,14 @@ ACTIVITY_LOG: dict[str, list[dict]] = {
 
 @router.get("/activity")
 async def get_activity(authorization: str = Header(None)):
-    nin = _verify(authorization)
+    nin = verify_token(authorization)
     return ACTIVITY_LOG.get(nin, [])
 
 
 # --- Payment History ---
 @router.get("/payments")
 async def get_payments(authorization: str = Header(None)):
-    nin = _verify(authorization)
+    nin = verify_token(authorization)
     from ..v1.payments import PAYMENTS_DB
     user_payments = [p for p in PAYMENTS_DB if p["user_nin"] == nin]
     return list(reversed(user_payments))
@@ -337,7 +327,7 @@ async def get_payments(authorization: str = Header(None)):
 # --- Change Password ---
 @router.post("/change-password", response_model=ChangePasswordResponse)
 async def change_password(req: ChangePasswordRequest, authorization: str = Header(None)):
-    nin = _verify(authorization)
+    nin = verify_token(authorization)
     user = MOCK_USERS.get(nin)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -445,13 +435,13 @@ async def get_about():
 # --- Notifications ---
 @router.get("/notifications")
 async def get_notifications(authorization: str = Header(None)):
-    nin = _verify(authorization)
+    nin = verify_token(authorization)
     return MOCK_USERS.get(nin, {}).get("notifications", [])
 
 
 @router.post("/notifications/read")
 async def mark_notifications_read(authorization: str = Header(None)):
-    nin = _verify(authorization)
+    nin = verify_token(authorization)
     MOCK_USERS[nin]["notifications"] = []
     return {"message": "Notifications cleared"}
 
@@ -459,7 +449,7 @@ async def mark_notifications_read(authorization: str = Header(None)):
 # --- Token verify & profile ---
 @router.get("/verify")
 async def verify_token(authorization: str = Header(None)):
-    nin = _verify(authorization)
+    nin = verify_token(authorization)
     user = MOCK_USERS.get(nin)
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
@@ -468,7 +458,7 @@ async def verify_token(authorization: str = Header(None)):
 
 @router.get("/profile")
 async def get_profile(authorization: str = Header(None)):
-    nin = _verify(authorization)
+    nin = verify_token(authorization)
     user = MOCK_USERS.get(nin)
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
