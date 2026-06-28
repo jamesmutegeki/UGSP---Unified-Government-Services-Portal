@@ -8,8 +8,6 @@ from typing import Optional
 
 from app.core.auth import verify_token
 
-from ..v1.payments import PAYMENTS_DB as GLOBAL_PAYMENTS
-
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -113,6 +111,7 @@ class FeedbackRequest(BaseModel):
     category: str = "general"
     rating: int = 5
     message: str = ""
+    metadata: Optional[dict] = None
 
     @field_validator("category")
     @classmethod

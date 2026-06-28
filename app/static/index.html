@@ -9,8 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'">
 <style>
 :root {
   --navy: #0c2d5e; --navy-light: #1a3f7a; --steel: #2e6b9e; --steel-light: #4a8bc2;
@@ -390,6 +389,8 @@ tbody tr:hover{background:#f8fafc}
 .page{animation:fadeIn 0.25s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .card,.service-card,.news-card,.help-cat,.about-section,.settings-card{border:1px solid transparent}
+/* Performance */
+.stat-grid,.service-grid,.ministry-grid{content-visibility:auto;contain-intrinsic-size:300px}
 .card:hover,.help-cat:hover,.about-section:hover,.settings-card:hover{border-color:var(--border)}
 .stat-card .stat-value{transition:color var(--transition)}
 .stat-click:hover .stat-value{color:var(--steel)}
@@ -444,6 +445,51 @@ tbody tr:hover{background:#f8fafc}
 .skeleton-text:last-child{width:40%}
 .skeleton-card{height:120px;width:100%}
 .skeleton-avatar{width:40px;height:40px;border-radius:50%}
+/* Dark mode */
+[data-theme="dark"] {
+  --bg: #0f1117; --surface: #1a1d27; --text: #e8eaed; --text-secondary: #9aa0a6;
+  --border: #2d3142; --navy: #1a3f7a; --navy-light: #2e569a; --steel: #4a8bc2;
+  --steel-light: #6aa8d8; --gold: #d4b85a; --gold-light: #e8d080;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3); --shadow-lg: 0 4px 16px rgba(0,0,0,0.4);
+  --state-error-bg: #2d1517; --state-error-border: #ef4444; --state-error-text: #fca5a5;
+  --state-success-bg: #162a1a; --state-success-border: #22c55e; --state-success-text: #86efac;
+  --skeleton-from: #2d3142; --skeleton-to: #3a3f52;
+  color-scheme: dark;
+}
+[data-theme="dark"] .card,.service-card,.news-card,.help-cat,.about-section,.settings-card{border-color:var(--border)}
+[data-theme="dark"] .stat-card .stat-icon{opacity:0.9}
+[data-theme="dark"] .form-group input,.form-group select{background:#0f1117;color:var(--text)}
+[data-theme="dark"] .form-group input:focus,.form-group select:focus{background:#1a1d27}
+[data-theme="dark"] .top-bar{background:var(--surface)}
+[data-theme="dark"] .notif-panel{background:var(--surface)}
+[data-theme="dark"] .notif-overlay{background:rgba(0,0,0,0.5)}
+[data-theme="dark"] .feedback-fab{box-shadow:0 4px 16px rgba(212,184,90,0.3)}
+[data-theme="dark"] .map-legend{background:var(--surface);color:var(--text)}
+[data-theme="dark"] .map-controls-wrap input{background:var(--surface);color:var(--text);border-color:var(--border)}
+[data-theme="dark"] .search-bar input{background:var(--bg);color:var(--text)}
+[data-theme="dark"] .search-bar input:focus{background:var(--surface)}
+[data-theme="dark"] .help-search input{background:var(--surface);color:var(--text);border-color:var(--border)}
+[data-theme="dark"] .pay-channel{background:var(--bg);border-color:var(--border)}
+[data-theme="dark"] .pay-channel.selected{background:rgba(46,107,158,0.15)}
+[data-theme="dark"] .checkout-summary{background:var(--bg)}
+[data-theme="dark"] .settings-row{border-color:var(--border)}
+[data-theme="dark"] tbody tr:hover{background:rgba(255,255,255,0.03)}
+[data-theme="dark"] .toggle-slider{background:#3a3f52}
+[data-theme="dark"] .notif-item.unread{background:rgba(46,107,158,0.12)}
+[data-theme="dark"] .notif-item.clickable:hover{background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .toast-success{background:#162a1a;color:#86efac;border-color:var(--state-success-border)}
+[data-theme="dark"] .toast-error{background:#2d1517;color:#fca5a5;border-color:var(--state-error-border)}
+[data-theme="dark"] .toast-info{background:rgba(46,107,158,0.2);color:#93c5fd;border-color:var(--steel-light)}
+[data-theme="dark"] .login-card{background:var(--surface)}
+[data-theme="dark"] .pw-toggle:hover{background:rgba(255,255,255,0.08)}
+[data-theme="dark"] .about-hero{background:linear-gradient(135deg,#1a3f7a,#0c2d5e)}
+[data-theme="dark"] .modal{background:var(--surface)}
+[data-theme="dark"] .modal-overlay{background:rgba(0,0,0,0.7)}
+[data-theme="dark"] .tfa-section{background:var(--bg)}
+[data-theme="dark"] .doc-badge.active{background:rgba(34,197,94,0.15);color:#86efac}
+[data-theme="dark"] .doc-badge.expired{background:rgba(239,68,68,0.15);color:#fca5a5}
+[data-theme="dark"] ::-webkit-scrollbar-thumb{background:var(--steel)}
+
 /* Toast notification system */
 .toast-container{position:fixed;top:16px;right:16px;z-index:1001;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);font-size:0.85rem;font-weight:500;max-width:380px;pointer-events:auto;animation:toastIn 0.25s var(--ease-out);transition:opacity var(--duration-normal),transform var(--duration-normal)}
@@ -455,12 +501,16 @@ tbody tr:hover{background:#f8fafc}
 .toast .toast-close{background:none;border:none;cursor:pointer;margin-left:auto;padding:2px;opacity:0.6;font-size:1.1rem;line-height:1;color:inherit}
 .toast .toast-close:hover{opacity:1}
 @keyframes toastIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+/* Offline bar */
+.offline-bar{display:none;position:sticky;top:0;z-index:9999;background:#fef3cd;color:#856404;text-align:center;padding:6px 16px;font-size:0.8rem;font-weight:500}
+.offline-bar.show{display:block}
+[data-theme="dark"] .offline-bar{background:#3d2e00;color:#fbbf24}
 
 </style>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
-<div id="offlineBar" style="display:none;position:sticky;top:0;z-index:9999;background:#fef3cd;color:#856404;text-align:center;padding:6px 16px;font-size:0.8rem;font-weight:500" role="alert">You are offline. Some features may be unavailable.</div>
+<div id="offlineBar" class="offline-bar" role="alert">You are offline. Some features may be unavailable.</div>
 
 <!-- Login -->
 <div id="loginPage" class="login-page">
@@ -491,8 +541,8 @@ tbody tr:hover{background:#f8fafc}
       <button class="btn btn-primary" id="tfaBtn" onclick="verify2FA()" disabled>Verify Code</button>
       <p class="text-secondary text-xs mt-sm">Code: <strong id="tfaDemoCode">------</strong> (demo)</p>
     </div>
-    <div class="separator">or</div>
-    <button type="button" class="btn btn-secondary w-full" onclick="showRegister()">Create an Account</button>
+    <div class="separator" id="loginSeparator">or</div>
+    <button type="button" class="btn btn-secondary w-full" id="loginRegisterBtn" onclick="showRegister()">Create an Account</button>
     <p class="login-footer">Demo: <strong>T1234567890</strong> / pass123 &middot; Powered by <strong>UGPass</strong></p>
   </div>
 </div>
@@ -569,7 +619,7 @@ tbody tr:hover{background:#f8fafc}
     </nav>
     <div class="sidebar-mobile-backdrop" id="sidebarBackdrop" onclick="toggleSidebarCollapse()"></div>
     <div class="sidebar-footer">
-      <div class="user-info"><div class="user-avatar" id="userAvatar">G</div><div class="user-details"><div class="user-name" id="userName">Grace Akello</div><div class="user-nin" id="userNin">T1234567890</div></div><button class="logout-btn material-icons-round" onclick="doLogout()" aria-label="Sign out">logout</button></div>
+      <div class="user-info"><div class="user-avatar" id="userAvatar">G</div><div class="user-details"><div class="user-name" id="userName">Grace Akello</div><div class="user-nin" id="userNin">T1234567890</div></div><span class="beta-badge" id="betaBadge" style="display:none;font-size:0.6rem;background:var(--gold);color:var(--navy);padding:2px 6px;border-radius:4px;font-weight:700;margin-right:4px">BETA</span><button class="logout-btn material-icons-round" onclick="doLogout()" aria-label="Sign out">logout</button></div>
     </div>
   </aside>
 
@@ -577,7 +627,10 @@ tbody tr:hover{background:#f8fafc}
     <header class="top-bar">
       <button class="sidebar-toggle material-icons-round" onclick="toggleSidebarCollapse()" id="sidebarToggle" title="Collapse sidebar" aria-label="Collapse sidebar">menu</button>
       <div class="search-bar" role="search"><span class="search-icon material-icons-round">search</span><input type="search" id="quickSearch" placeholder="Search services, ministries..." onkeydown="if(event.key==='Enter')quickSearchGo()" aria-label="Search"></div>
-      <div class="top-bar-right"><button class="notif-btn material-icons-round" onclick="toggleNotifPanel()" aria-label="Notifications" id="notifBtn" aria-expanded="false">notifications<span class="notif-dot" id="notifDot"></span></button></div>
+      <div class="top-bar-right">
+        <button class="notif-btn material-icons-round" onclick="toggleDarkMode()" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">dark_mode</button>
+        <button class="notif-btn material-icons-round" onclick="toggleNotifPanel()" aria-label="Notifications" id="notifBtn" aria-expanded="false">notifications<span class="notif-dot" id="notifDot"></span></button>
+      </div>
     </header>
 
     <!-- Toast notifications -->
@@ -713,7 +766,7 @@ tbody tr:hover{background:#f8fafc}
       <div class="page-2col">
         <div>
           <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">lock</span> Change Password</h4><form id="setPassForm" onsubmit="changePassword();return false"><div class="form-group"><label for="setCurPass">Current Password</label><div class="pw-wrap"><input type="password" id="setCurPass" placeholder="Current password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setCurPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><div class="form-group"><label for="setNewPass">New Password</label><div class="pw-wrap"><input type="password" id="setNewPass" placeholder="New password (min 6 chars)"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setNewPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><div class="form-group"><label for="setConfirmPass">Confirm New Password</label><div class="pw-wrap"><input type="password" id="setConfirmPass" placeholder="Confirm new password"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('setConfirmPass',this)" aria-label="Toggle visibility" tabindex="-1">visibility_off</button></div></div><button class="btn btn-primary" type="submit" style="width:auto">Update Password</button><p id="setPassMsg" class="login-error" style="margin-top:6px"></p></form></div>
-          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">palette</span> Appearance</h4><div class="settings-row"><div><div class="sl-label">Language</div><div class="sl-desc">Choose your preferred language</div></div><select id="setLang" onchange="setLanguage(this.value)" style="padding:6px 10px;border:2px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.82rem"><option value="en">English</option><option value="lug">Luganda</option><option value="swa">Swahili</option><option value="luo">Luo (Acholi)</option><option value="nyk">Runyankole</option></select></div></div>
+          <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">palette</span> Appearance</h4><div class="settings-row"><div><div class="sl-label">Language</div><div class="sl-desc">Choose your preferred language</div></div><select id="setLang" onchange="setLanguage(this.value)" style="padding:6px 10px;border:2px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.82rem"><option value="en">English</option><option value="lug">Luganda</option><option value="swa">Swahili</option><option value="luo">Luo (Acholi)</option><option value="nyk">Runyankole</option></select></div><div class="settings-row"><div><div class="sl-label">Theme</div><div class="sl-desc">Choose light or dark appearance</div></div><select id="setTheme" onchange="if(this.value==='dark'){if(!document.documentElement.getAttribute('data-theme'))toggleDarkMode()}else{if(document.documentElement.getAttribute('data-theme'))toggleDarkMode()}" style="padding:6px 10px;border:2px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.82rem"><option value="light">Light</option><option value="dark">Dark</option></select></div></div>
           <div class="settings-card"><h4><span class="material-icons-round" style="font-size:18px">notifications</span> Notifications</h4><div class="settings-row"><div><div class="sl-label">Email Notifications</div><div class="sl-desc">Receive updates about your applications via email</div></div><label class="toggle"><input type="checkbox" checked id="setEmailNotif" onchange="savePrefs()"><span class="toggle-slider"></span></label></div><div class="settings-row"><div><div class="sl-label">SMS Notifications</div><div class="sl-desc">Receive SMS alerts for payment confirmations</div></div><label class="toggle"><input type="checkbox" checked id="setSmsNotif" onchange="savePrefs()"><span class="toggle-slider"></span></label></div></div>
         </div>
         <div>
@@ -746,6 +799,13 @@ tbody tr:hover{background:#f8fafc}
   <div><label class="fw-600" style="font-size:0.82rem;display:block;margin-bottom:4px">Your Message</label><textarea id="feedbackMessage" rows="4" class="w-full" style="padding:10px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;resize:vertical" placeholder="Describe your experience or suggestion..."></textarea></div>
   <div class="text-xs text-secondary mt-xs">All feedback is anonymous unless you provide contact details.</div>
 </div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('feedbackModal')">Cancel</button><button class="btn btn-primary" onclick="submitFeedback()">Submit Feedback</button></div></div></div>
+
+<!-- Bug Reporter Modal -->
+<div class="modal-overlay" id="bugModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="bugTitle" style="width:480px"><div class="modal-header"><h3 id="bugTitle"><span class="material-icons-round" style="font-size:18px;vertical-align:middle">bug_report</span> Report a Bug</h3><button class="modal-close material-icons-round" onclick="closeModal('bugModal')" aria-label="Close">close</button></div><div class="modal-body">
+  <p class="text-sm text-secondary mb-md">Found an issue? Hit <kbd style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:0.75rem">Ctrl+Shift+B</kbd> anytime to report it.</p>
+  <div class="mb-md"><label class="fw-600" style="font-size:0.82rem;display:block;margin-bottom:4px">What happened?</label><textarea id="bugDescription" rows="4" class="w-full" style="padding:10px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;resize:vertical" placeholder="Describe the bug step-by-step..."></textarea></div>
+  <div id="bugMeta" class="text-xs" style="color:var(--text-secondary);background:var(--bg);padding:8px 10px;border-radius:var(--radius-sm);font-family:monospace;line-height:1.6"></div>
+</div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('bugModal')">Cancel</button><button class="btn btn-primary" onclick="submitBugReport()">Send Report</button></div></div></div>
 
 <!-- Service Modal -->
 <div class="modal-overlay" id="serviceModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><h3 id="modalTitle">Service Details</h3><button class="modal-close material-icons-round" onclick="closeModal('serviceModal')" aria-label="Close">close</button></div><div class="modal-body" id="serviceModalBody"></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('serviceModal')">Cancel</button><button class="btn btn-primary" id="applyBtn" onclick="applyService()">Apply Now</button></div></div></div>
@@ -832,17 +892,29 @@ function setLanguage(lang) {
   if (STATE.token && document.getElementById('appLayout').classList.contains('active')) {
     loadDashboard(); loadApplications();
   }
+  if (typeof showMsg === 'function' && STATE.token) showMsg('info', 'Language changed to ' + LANG[lang]?.['nav.dashboard'] || lang);
 }
 (function() { const saved = localStorage.getItem('ugsp_lang'); if (saved) setLanguage(saved); })();
 
-// ===== API =====
+// ===== API with TTL Cache =====
+const API_CACHE = new Map();
+const CACHE_TTL = 30000; // 30 seconds
+function cacheKey(method, path) { return `${method}:${path}`; }
+function cacheGet(key) { const hit = API_CACHE.get(key); if (hit && Date.now() - hit.ts < CACHE_TTL) return hit.data; API_CACHE.delete(key); return null; }
+function cacheSet(key, data) { API_CACHE.set(key, { data, ts: Date.now() }); if (API_CACHE.size > 100) { const oldest = API_CACHE.keys().next().value; if (oldest) API_CACHE.delete(oldest); } }
+function cacheBust(pathPrefix) { for (const k of API_CACHE.keys()) { if (k.endsWith(pathPrefix)) API_CACHE.delete(k); } }
+
 async function api(method, path, body) {
+  const key = cacheKey(method, path);
+  if (method === 'GET') { const hit = cacheGet(key); if (hit) return hit; }
   const opts = { method, headers: {} };
   if (STATE.token) opts.headers['Authorization'] = `Bearer ${STATE.token}`;
   if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
   const r = await fetch(path, opts);
   if (!r.ok) { const e = await r.json().catch(()=>({detail:r.statusText})); throw new Error(e.detail||'Request failed'); }
-  return r.json();
+  const data = await r.json();
+  if (method === 'GET') cacheSet(key, data);
+  return data;
 }
 
 // ===== NOTIFICATIONS =====
@@ -917,7 +989,10 @@ function markNotifRead(i) {
   if (STATE.notifHistory[i]) { STATE.notifHistory[i].read = true; saveNotifHistory(); renderNotifs(); updateNotifDot(); }
 }
 function timeSince(d) {
-  const diff = Date.now() - new Date(d).getTime();
+  if (!d) return 'Unknown';
+  const ts = new Date(d).getTime();
+  if (isNaN(ts)) return 'Unknown';
+  const diff = Date.now() - ts;
   const mins = Math.floor(diff/60000); if (mins<1) return 'Just now'; if (mins<60) return `${mins}m ago`;
   const hrs = Math.floor(mins/60); if (hrs<24) return `${hrs}h ago`;
   const days = Math.floor(hrs/24); if (days<30) return `${days}d ago`;
@@ -972,8 +1047,8 @@ function doLogin() {
       tfaPendingToken = d.token;
       STATE.user = d;
       btn.style.display = 'none';
-      document.querySelector('.separator').style.display = 'none';
-      document.querySelector('.w-full[onclick="showRegister()"]').style.display = 'none';
+      document.getElementById('loginSeparator').style.display = 'none';
+      document.getElementById('loginRegisterBtn').style.display = 'none';
       document.getElementById('tfaSection').classList.add('active');
       document.getElementById('tfaInputs').querySelector('input').focus();
       document.getElementById('tfaDemoCode').textContent = d.demo_2fa_code || '123456';
@@ -1018,18 +1093,24 @@ function enterApp() {
   updateSidebarAvatar(STATE.user);
   document.getElementById('dashName').textContent = STATE.user.name.split(' ')[0];
   document.getElementById('feedbackFab').style.display = 'flex';
+  if (STATE.user.nin && STATE.user.nin.startsWith('T12')) document.getElementById('betaBadge').style.display = 'inline';
   loadNotifHistory();
-  loadDashboard(); loadServices(); loadApplications(); loadProfile(); loadMinistries();
-  loadDocuments(); loadPayments(); loadNews(); loadHelp(); loadSettingsActivity(); loadAbout();
+  Promise.allSettled([
+    loadDashboard(), loadServices(), loadApplications(), loadProfile(), loadMinistries(),
+    loadDocuments(), loadPayments(), loadNews(), loadHelp(), loadSettingsActivity(), loadAbout(),
+  ]);
 }
 function doLogout() {
   STATE.token = null; STATE.user = null; STATE.notifHistory = []; tfaPendingToken = null;
   localStorage.removeItem('ugsp_token'); localStorage.removeItem('ugsp_user');
   document.getElementById('tfaSection').classList.remove('active');
-  document.getElementById('loginBtn').style.display = 'inline-flex';
-  document.querySelector('.separator').style.display = 'flex';
-  document.querySelector('.w-full[onclick="showRegister()"]').style.display = 'inline-flex';
-  document.querySelectorAll('#tfaInputs input').forEach(i => i.value = '');
+  const loginBtn = document.getElementById('loginBtn');
+  loginBtn.style.display = 'inline-flex'; loginBtn.disabled = false;
+  document.querySelector('#loginBtnText').textContent = 'Sign in with UGPass';
+  document.querySelector('#loginSpinner').style.display = 'none';
+  document.getElementById('loginSeparator').style.display = 'flex';
+  document.getElementById('loginRegisterBtn').style.display = 'inline-flex';
+  document.querySelectorAll('#tfaInputs input').forEach(i => { i.value = ''; });
   document.getElementById('tfaBtn').disabled = true;
   document.getElementById('loginPage').style.display = 'flex';
   document.getElementById('registerPage').style.display = 'none';
@@ -1049,7 +1130,8 @@ function navigateTo(page) {
   const nav = document.querySelector(`.nav-item[data-page="${page}"]`);
   if (nav) nav.classList.add('active');
   window.location.hash = page;
-  if (page === 'map') setTimeout(initMap, 200);
+  if (page === 'map') { loadLeaflet(); setTimeout(initMap, 300); }
+  if (page === 'search') setTimeout(() => document.getElementById('searchInput').focus(), 100);
   if (page === 'documents') loadDocuments();
   if (page === 'payments') loadPayments();
   if (page === 'news') loadNews();
@@ -1135,7 +1217,8 @@ function closeModal(id) {
   const el = document.getElementById(id);
   el.classList.remove('active');
   el.removeEventListener('keydown', _trapFocus);
-  if (_lastFocused) { _lastFocused.focus(); _lastFocused = null; }
+  if (_lastFocused && document.body.contains(_lastFocused)) { _lastFocused.focus(); }
+  _lastFocused = null;
 }
 function _trapFocus(e) {
   if (e.key !== 'Tab') return;
@@ -1148,7 +1231,16 @@ function _trapFocus(e) {
 }
 
 // ===== DASHBOARD =====
+function showDashSkeletons() {
+  document.getElementById('statGrid').innerHTML = Array(4).fill(0).map(() =>
+    '<div class="card stat-card"><div class="skeleton skeleton-avatar" style="margin-bottom:10px"></div><div class="skeleton skeleton-text" style="height:24px;width:60%"></div><div class="skeleton skeleton-text" style="width:40%"></div></div>'
+  ).join('');
+  document.getElementById('featuredServices').innerHTML = Array(4).fill(0).map(() =>
+    '<div class="service-card"><div class="skeleton skeleton-avatar" style="margin-bottom:10px"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text" style="width:50%"></div><div class="skeleton skeleton-text" style="width:80%"></div></div>'
+  ).join('');
+}
 async function loadDashboard() {
+  showDashSkeletons();
   try {
     const [apps, cats] = await Promise.all([api('GET','/applications'), api('GET','/catalogue')]);
     const approved = apps.filter(a=>a.status==='approved').length;
@@ -1164,7 +1256,33 @@ async function loadDashboard() {
       return `<div class="card stat-card stat-click" ${clickable}><div class="stat-icon" style="background:${s.color};color:${s.iconBg}"><span class="material-icons-round" aria-hidden="true">${s.icon}</span></div><div class="stat-value">${s.value}</div><div class="stat-label">${s.label}</div></div>`;
     }).join('');
     document.getElementById('featuredServices').innerHTML = cats.slice(0,4).map(s => renderServiceCard(s)).join('');
+    loadDashActivity();
   } catch(e) { showMsg('error','Failed to load dashboard'); }
+}
+async function loadDashActivity() {
+  try {
+    const acts = await api('GET', '/auth/activity');
+    if (!acts.length) return;
+    const container = document.createElement('div');
+    container.className = 'card';
+    container.style.marginTop = '16px';
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const today = new Date().getDay();
+    const weekDays = Array.from({length:7}, (_, i) => days[(today - 6 + i + 7) % 7]);
+    const binned = Array(7).fill(0);
+    const now = Date.now();
+    acts.forEach(a => {
+      const t = new Date(a.timestamp).getTime();
+      const dayDiff = Math.floor((now - t) / 86400000);
+      if (dayDiff >= 0 && dayDiff < 7) binned[6 - dayDiff]++;
+    });
+    const max = Math.max(...binned, 1);
+    container.innerHTML = `<div class="d-flex-between mb-sm"><h4 style="font-size:0.9rem;font-weight:600"><span class="material-icons-round" style="font-size:16px;vertical-align:middle">history</span> Activity Heatmap (7 days)</h4></div><div class="d-flex-center gap-sm" style="justify-content:space-around">${binned.map((v, i) => {
+      const intensity = Math.max(10, Math.round(30 + (v / max) * 60));
+      return `<div style="text-align:center"><div style="width:28px;height:28px;border-radius:6px;background:rgba(46,107,158,${v/max || 0.08});display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:${v > 0 ? 'white' : 'var(--text-secondary)'}">${v||''}</div><span style="font-size:0.6rem;color:var(--text-secondary)">${weekDays[i]}</span></div>`;
+    }).join('')}</div>`;
+    document.getElementById('statGrid').after(container);
+  } catch(e) { /* non-critical */ }
 }
 
 // ===== SERVICES =====
@@ -1210,6 +1328,7 @@ async function applyService() {
   if (!selectedService) return; closeModal('serviceModal');
   try {
     const r = await api('POST','/applications',{service_id:selectedService.id,metadata:{}});
+    cacheBust('/applications');
     STATE.cartItems.push({service:selectedService,applicationId:r.application_id});
     showMsg('success',`${selectedService.name} submitted!`, { applicationId: r.application_id, serviceName: selectedService.name });
     if (selectedService.fee > 0) openCheckout(selectedService);
@@ -1228,7 +1347,7 @@ function updatePayFields(channel) {
   document.querySelector(`input[name="channel"][value="${channel}"]`).checked = true;
   const cfg = PAY_FIELD_CONFIG[channel];
   if (!cfg) { document.getElementById('payFields').innerHTML = ''; return; }
-  document.getElementById('payFields').innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="material-icons-round" style="color:var(--steel)">${cfg.icon}</span><span style="font-weight:600;font-size:0.85rem;text-transform:capitalize">${channel.replace(/_/g,' ')} Details</span></div>` + cfg.fields.map(f => `<div class="form-group" style="margin-bottom:8px"><label>${f.label}</label><input type="${f.type}" id="${f.id}" placeholder="${f.placeholder}" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;transition:border-color var(--transition);background:#fafbfc" onfocus="this.style.borderColor='var(--steel)';this.style.background='white'" onblur="this.style.borderColor='var(--border)';this.style.background='#fafbfc'"></div>`).join('');
+  document.getElementById('payFields').innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="material-icons-round" style="color:var(--steel)">${cfg.icon}</span><span style="font-weight:600;font-size:0.85rem;text-transform:capitalize">${channel.replace(/_/g,' ')} Details</span></div>` + cfg.fields.map(f => `<div class="form-group" style="margin-bottom:8px"><label for="${f.id}">${f.label}</label><input type="${f.type}" id="${f.id}" placeholder="${f.placeholder}" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;transition:border-color var(--transition);background:#fafbfc" onfocus="this.style.borderColor='var(--steel)';this.style.background='white'" onblur="this.style.borderColor='var(--border)';this.style.background='#fafbfc'"></div>`).join('');
 }
 function openCheckout(service) {
   document.getElementById('checkoutSummary').innerHTML = `<div class="checkout-row"><span>${service.name}</span><span>UGX ${service.fee.toLocaleString()}</span></div><div class="checkout-row total"><span>Total</span><span>UGX ${service.fee.toLocaleString()}</span></div>`;
@@ -1242,6 +1361,7 @@ async function doCheckout() {
   document.getElementById('checkoutBtn').disabled = true;
   try {
     const r = await api('POST','/payments/checkout',{service_id:selectedService.id,amount:selectedService.fee,channel});
+    cacheBust('/auth/payments');
     document.getElementById('checkoutBtn').style.display = 'none';
     document.getElementById('prnContainer').innerHTML = `<div class="prn-box"><div class="prn-label">Payment Reference Number</div><div class="prn-value">${r.prn}</div><div class="prn-note">UGX ${r.amount.toLocaleString()} via ${channel.replace(/_/g,' ')}</div></div>`;
     showMsg('success',`PRN generated: ${r.prn}`, { applicationId: STATE.cartItems.length > 0 ? STATE.cartItems[STATE.cartItems.length-1].applicationId : null });
@@ -1256,7 +1376,7 @@ async function loadApplications() {
     const data = await api('GET','/applications');
     window._allApps = data;
     renderAppsTable();
-  } catch(e) {}
+  } catch(e) { console.warn('Failed to load applications:', e); }
 }
 function renderAppsTable() {
   const data = window._allApps || [];
@@ -1288,9 +1408,12 @@ function showAppAction(id, action) {
   } else if (action === 'edit') {
     showMsg('info',`Editing #${id}: ${app.service_name} (simulated)`);
   } else if (action === 'delete') {
-    window._allApps = window._allApps.filter(a => a.id !== id);
-    renderAppsTable();
-    showMsg('success',`#${id} ${app.service_name} deleted`);
+    api('DELETE', `/applications/${id}`).then(() => {
+      cacheBust('/applications');
+      window._allApps = window._allApps.filter(a => a.id !== id);
+      renderAppsTable();
+      showMsg('success', `#${id} ${app.service_name} deleted`);
+    }).catch(e => showMsg('error', e.message));
   }
 }
 
@@ -1305,7 +1428,7 @@ async function doSearch() {
       const c = document.getElementById('searchResults');
       let html = '';
       if (services.length) html += `<strong style="font-size:0.78rem;text-transform:uppercase;color:var(--text-secondary);letter-spacing:0.04em">Services (${services.length})</strong>` + services.map(s => `<div class="search-result" onclick="showServiceDetail(${s.id})" tabindex="0" role="button" style="cursor:pointer"><h4>${s.name}</h4><div class="ministry">${s.ministry} &middot; UGX ${s.fee.toLocaleString()}</div><p>${s.description}</p></div>`).join('');
-      if (ministries.length) html += `<strong style="font-size:0.78rem;text-transform:uppercase;color:var(--text-secondary);letter-spacing:0.04em;display:block;margin-top:12px">Ministries (${ministries.length})</strong>` + ministries.map(m => `<div class="search-result" onclick="navigateTo('ministries');setTimeout(()=>{document.getElementById('ministrySearch').value='${m.name.replace(/'/g,"\\'")}';loadMinistries()},100)" tabindex="0" role="button" style="cursor:pointer"><h4>${m.name}</h4><div class="ministry">${m.full_name} &middot; <span class="m-cat">${m.category}</span></div></div>`).join('');
+      if (ministries.length) html += `<strong style="font-size:0.78rem;text-transform:uppercase;color:var(--text-secondary);letter-spacing:0.04em;display:block;margin-top:12px">Ministries (${ministries.length})</strong>` + ministries.map(m => `<div class="search-result" data-mname="${m.name.replace(/"/g,'&quot;')}" onclick="navigateTo('ministries');setTimeout(()=>{const el=this;document.getElementById('ministrySearch').value=el.dataset.mname;loadMinistries()},100)" tabindex="0" role="button" style="cursor:pointer"><h4>${m.name.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</h4><div class="ministry">${m.full_name.replace(/</g,'&lt;')} &middot; <span class="m-cat">${m.category}</span></div></div>`).join('');
       if (!services.length && !ministries.length) html = '<div class="empty-state"><div class="empty-icon material-icons-round">search_off</div><h4>No results</h4><p>Try a different search term.</p></div>';
       c.innerHTML = html;
     } catch(e) { showMsg('error','Search failed'); }
@@ -1314,6 +1437,17 @@ async function doSearch() {
 function quickSearchGo() {
   const q = document.getElementById('quickSearch').value.trim();
   if (q) { navigateTo('search'); document.getElementById('searchInput').value = q; doSearch(); }
+}
+
+// ===== LAZY LEAFLET =====
+let leafletLoaded = false;
+function loadLeaflet() {
+  if (leafletLoaded) return;
+  leafletLoaded = true;
+  const s = document.createElement('script');
+  s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  s.onload = () => { if (document.getElementById('pageMap').classList.contains('active')) setTimeout(initMap, 200); };
+  document.head.appendChild(s);
 }
 
 // ===== MINISTRIES =====
@@ -1356,7 +1490,7 @@ async function loadMinistries() {
       const mc = MINISTRY_COLORS[m.category] || '#2e6b9e';
       return `<div class="ministry-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="m-logo-svg">${logo ? logo.svg : '<div style="width:40px;height:40px;border-radius:10px;background:'+mc+';color:white;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700">'+(m.name.charAt(0))+'</div>'}</div><div style="flex:1;min-width:0"><div class="m-name">${m.name}</div><div class="m-full">${m.full_name}</div></div></div><span class="m-cat" style="background:${mc}18;color:${mc}">${m.category}</span><a class="m-link" href="${m.website}" target="_blank" rel="noopener"><span class="material-icons-round" style="font-size:14px">open_in_new</span> Visit website</a></div>`;
     }).join('');
-  } catch(e) {}
+  } catch(e) { console.warn('Failed to load ministries:', e); }
 }
 
 // ===== MAP =====
@@ -1438,6 +1572,7 @@ async function uploadPhoto(input) {
   try {
     const r = await fetch('/uploads/photo', { method: 'POST', headers: { 'Authorization': `Bearer ${STATE.token}` }, body: fd });
     if (!r.ok) throw new Error((await r.json()).detail);
+    cacheBust('/auth/profile');
     const d = await r.json();
     const prev = document.getElementById('photoPreview');
     prev.innerHTML = `<img src="${d.photo_url}?t=${Date.now()}" alt="Profile photo">`;
@@ -1457,13 +1592,13 @@ async function loadProfile() {
     document.getElementById('profilePhone').value = p.phone;
     document.getElementById('profileNationality').value = p.nationality;
     document.getElementById('profileCategory').value = p.category;
-    document.getElementById('profileVerified').value = p.verified ? '&#10003; Verified' : 'Not Verified';
+    document.getElementById('profileVerified').value = p.verified ? '\u2713 Verified' : 'Not Verified';
     if (p.photo_url) {
       document.getElementById('photoPreview').innerHTML = `<img src="${p.photo_url}?t=${Date.now()}" alt="Profile photo">`;
       STATE.user.photo_url = p.photo_url;
       updateSidebarAvatar(STATE.user);
     }
-  } catch(e) {}
+  } catch(e) { console.warn('Failed to load profile:', e); }
 }
 
 // ===== FEEDBACK =====
@@ -1605,17 +1740,7 @@ async function loadActivity() {
     list.innerHTML = acts.map(a => `<div class="activity-item"><div class="activity-dot"></div><div><div class="a-text">${a.action}</div><div class="a-meta">${timeAgo(a.timestamp)} &middot; ${a.device} &middot; ${a.ip}</div></div></div>`).join('');
   } catch(e) { document.getElementById('activityList').innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">error_outline</div><h4>Failed to load</h4></div>'; }
 }
-function timeAgo(iso) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString('en-UG',{day:'numeric',month:'short',year:'numeric'});
-}
+function timeAgo(iso) { return timeSince(iso); }
 
 // ===== ABOUT =====
 async function loadAbout() {
@@ -1630,10 +1755,67 @@ async function loadAbout() {
   } catch(e) { document.getElementById('aboutContent').innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">error_outline</div><h4>Failed to load</h4></div>'; }
 }
 
+// ===== BUG REPORTER =====
+let _recentErrors = [];
+window.addEventListener('error', function(e) {
+  _recentErrors.push({ msg: e.message, url: e.filename, line: e.lineno, col: e.colno, time: new Date().toISOString() });
+  if (_recentErrors.length > 20) _recentErrors.shift();
+});
+function openBugReporter() {
+  if (!STATE.token) return;
+  document.getElementById('bugDescription').value = '';
+  const meta = [
+    'Page: ' + window.location.hash || '/',
+    'Time: ' + new Date().toLocaleString(),
+    'UA: ' + navigator.userAgent.slice(0,120),
+    'Online: ' + (navigator.onLine ? 'yes' : 'no'),
+    'Theme: ' + (document.documentElement.getAttribute('data-theme') || 'light'),
+    'Errors (' + _recentErrors.length + '): ' + (_recentErrors.length ? _recentErrors.slice(-3).map(e => '[' + e.msg + ']').join(' ') : 'none'),
+  ].join('\n');
+  document.getElementById('bugMeta').textContent = meta;
+  closeModal('feedbackModal'); openModal('bugModal');
+}
+async function submitBugReport() {
+  const desc = document.getElementById('bugDescription').value.trim();
+  if (!desc) { showMsg('error', 'Please describe the bug'); return; }
+  try {
+    await api('POST', '/auth/feedback', {
+      category: 'bug', rating: 1, message: desc,
+      metadata: { type: 'bug_report', page: location.hash, ua: navigator.userAgent.slice(0,200), errors: _recentErrors.slice(-5) }
+    });
+    showMsg('success', 'Bug report sent. Thank you!');
+    closeModal('bugModal');
+  } catch(e) { showMsg('error', 'Could not send report: ' + e.message); }
+}
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.shiftKey && e.key === 'B') { e.preventDefault(); openBugReporter(); }
+});
+
+// ===== DARK MODE =====
+function toggleDarkMode() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  const next = isDark ? '' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('ugsp_theme', next || 'light');
+  document.getElementById('darkModeToggle').textContent = next ? 'light_mode' : 'dark_mode';
+  const sel = document.getElementById('setTheme');
+  if (sel) sel.value = next || 'light';
+}
+(function() {
+  const saved = localStorage.getItem('ugsp_theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const useDark = saved ? saved === 'dark' : prefersDark;
+  if (useDark) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const toggle = document.getElementById('darkModeToggle');
+    if (toggle) toggle.textContent = 'light_mode';
+  }
+})();
+
 // ===== ONLINE / OFFLINE =====
 function updateOnlineStatus() {
-  const bar = document.getElementById('offlineBar');
-  if (navigator.onLine) { bar.style.display = 'none'; } else { bar.style.display = 'block'; }
+  document.getElementById('offlineBar').classList.toggle('show', !navigator.onLine);
 }
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);

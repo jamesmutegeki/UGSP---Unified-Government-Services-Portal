@@ -70,3 +70,15 @@ async def get_application(app_id: int, authorization: str = Header(None)):
             result["service_name"] = service_map.get(result["service_id"], "Unknown Service")
             return result
     raise HTTPException(status_code=404, detail="Application not found")
+
+
+@router.delete("/{app_id}")
+async def delete_application(app_id: int, authorization: str = Header(None)):
+    nin = verify_token(authorization)
+    for i, a in enumerate(APPLICATIONS_DB):
+        if a["id"] == app_id and a["user_nin"] == nin:
+            if a["status"] not in ("draft", "submitted"):
+                raise HTTPException(status_code=400, detail="Only draft or submitted applications can be deleted")
+            APPLICATIONS_DB.pop(i)
+            return {"status": "deleted", "message": f"Application #{app_id} deleted"}
+    raise HTTPException(status_code=404, detail="Application not found")
