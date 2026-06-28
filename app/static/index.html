@@ -11,13 +11,14 @@
 <style>
 :root {
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
-  --navy: #0c2d5e; --navy-light: #1a3f7a; --steel: #2e6b9e; --steel-light: #4a8bc2;
-  --gold: #c8a84e; --gold-light: #e0c66a; --bg: #f0f2f5; --surface: #ffffff;
+  --navy: #031C3E; --navy-light: #062E5E; --steel: #0A4DA2; --steel-light: #1565C0;
+  --gold: #FFB81C; --gold-light: #FFD666; --ministry-50: #EAF2FB; --bg: #f0f2f5; --surface: #ffffff;
   --text: #1a1a2e; --text-secondary: #5a6a7e; --border: #dce0e5;
   --success: #2e7d32; --warning: #f9a825; --error: #c62828;
-  --radius: 12px; --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(12,45,94,0.08), 0 1px 2px rgba(12,45,94,0.06);
-  --shadow-lg: 0 4px 16px rgba(12,45,94,0.12);
+  --radius: 12px; --radius-sm: 8px; --radius-xl: 16px;
+  --shadow: 0 1px 3px rgba(3,28,62,0.08), 0 1px 2px rgba(3,28,62,0.06);
+  --shadow-lg: 0 4px 16px rgba(3,28,62,0.12);
+  --shadow-xl: 0 8px 32px rgba(3,28,62,0.16);
   --sidebar-w: 260px; --top-h: 64px; --transition: 0.2s ease; --spring: cubic-bezier(0.34,1.56,0.64,1);
   /* State tokens */
   --state-loading: color-mix(in srgb, var(--steel) 20%, transparent);
@@ -52,19 +53,25 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 .pw-wrap input{flex:1;padding-right:40px}
 .pw-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);padding:6px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:1.15rem}
 .pw-toggle:hover{color:var(--steel);background:rgba(0,0,0,0.04)}
-/* Login - Mountain Rwenzori Ken Burns */
-.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.ken-burns-bg{position:absolute;inset:0;background:url('/static/jinja-sunset.jpg') center/cover no-repeat;animation:kenBurns 20s ease-in-out infinite alternate;z-index:0}
-@keyframes kenBurns{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.03) translate(-1%,-1%)}}
-.login-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(12,45,94,0.75),rgba(10,35,69,0.85));z-index:1}
-.login-card{background:var(--surface);border-radius:20px;padding:48px 40px;width:420px;max-width:92vw;box-shadow:0 24px 48px rgba(0,0,0,0.4);text-align:center;position:relative;z-index:2}
-.coat-of-arms{width:100px;height:100px;margin:0 auto 8px;object-fit:contain;display:block;padding:4px}
-.login-card h1{font-size:1.3rem;font-weight:700;margin-bottom:2px}
-.login-card .subtitle{font-size:0.82rem;color:var(--text-secondary);margin-bottom:20px}
+/* Login - GDR-inspired two-panel split */
+.login-page{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;position:relative;overflow:hidden}
+.login-brand{background:linear-gradient(135deg,var(--navy) 0%,#0A4DA2 50%,var(--steel-light) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;position:relative;overflow:hidden}
+.login-brand::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 80%,rgba(255,184,28,0.15) 0%,transparent 70%),radial-gradient(ellipse 60% 50% at 80% 20%,rgba(255,255,255,0.08) 0%,transparent 60%);pointer-events:none}
+.login-brand .coa{width:120px;height:120px;object-fit:contain;margin-bottom:16px;position:relative;z-index:1}
+.login-brand h1{color:white;font-size:1.8rem;font-weight:700;text-align:center;line-height:1.2;position:relative;z-index:1}
+.login-brand .brand-sub{color:rgba(255,255,255,0.8);font-size:0.95rem;margin-top:8px;text-align:center;position:relative;z-index:1}
+.login-brand .brand-tag{background:rgba(255,184,28,0.2);color:var(--gold);padding:6px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-top:20px;position:relative;z-index:1}
+.login-form-panel{display:flex;align-items:center;justify-content:center;padding:48px;background:var(--surface)}
+.login-form-wrap{width:400px;max-width:100%}
+.login-form-wrap .form-logo{display:none}
+.login-card{text-align:center}
+.login-card .form-logo-desktop{width:80px;height:80px;object-fit:contain;margin:0 auto 16px;display:block}
+.login-card h1{font-size:1.4rem;font-weight:700;margin-bottom:4px;letter-spacing:-0.02em}
+.login-card .subtitle{font-size:0.85rem;color:var(--text-secondary);margin-bottom:24px}
 .form-group{text-align:left;margin-bottom:14px}
 .form-group label{display:block;font-size:0.78rem;font-weight:600;margin-bottom:4px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.03em}
-.form-group input,.form-group select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:inherit;transition:border-color var(--transition);background:#fafbfc}
-.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--steel);background:white}
+.form-group input,.form-group select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:inherit;transition:border-color var(--transition);background:var(--ministry-50)}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--steel);background:var(--surface)}
 .form-group input:user-invalid,.form-group select:user-invalid{border-color:var(--error)!important;background:#fef2f2!important}
 .form-group input:user-valid{border-color:var(--success)!important}
 .form-group select{appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%235a6a7e'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 12px center/12px no-repeat #fafbfc}
@@ -74,7 +81,7 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 .btn-secondary{background:var(--bg);color:var(--text)}
 .btn-secondary:hover{background:var(--border)}
 .btn-ghost{background:transparent;color:var(--steel)}
-.btn-ghost:hover{background:rgba(46,107,158,0.08)}
+.btn-ghost:hover{background:rgba(10,77,162,0.08)}
 .btn-sm{padding:8px 16px;font-size:0.8rem}
 .btn-success{background:var(--success);color:white}
 .btn-success:hover{background:#236b26}
@@ -92,7 +99,7 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 .app-layout{display:none;min-height:100vh}.app-layout.active{display:flex}
 /* Sidebar */
 .sidebar{width:var(--sidebar-w);background:var(--navy);color:white;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100;transition:transform 0.3s var(--spring)}
-.sidebar-header{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.1);min-height:var(--top-h)}
+.sidebar-header{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.08);min-height:var(--top-h)}
 .sidebar-toggle{background:none;border:none;color:var(--text);cursor:pointer;padding:6px;border-radius:6px;font-size:1.4rem;display:flex;align-items:center;justify-content:center;transition:background 0.2s ease}
 .sidebar-toggle:hover{background:rgba(0,0,0,0.05)}
 .sidebar-header .logo{width:38px;height:38px;flex-shrink:0;fill:var(--gold)}
@@ -111,10 +118,10 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 .user-details{flex:1;min-width:0}
 .user-name{font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-nin{font-size:0.68rem;opacity:0.6}
-.logout-btn{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:4px;border-radius:4px}
+.logout-btn{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;padding:4px;border-radius:4px;display:flex;align-items:center}
 .logout-btn:hover{color:white;background:rgba(255,255,255,0.1)}
 /* Main */
-.main-content{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
+.main-content{margin-left:var(--sidebar-w);flex:1;min-height:100vh;position:relative;z-index:1}
 .top-bar{height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:50}
 
 .search-bar{flex:1;max-width:440px;position:relative}
@@ -143,7 +150,7 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 .page-header h2{font-size:1.4rem;font-weight:700}
 .page-header p{color:var(--text-secondary);font-size:0.88rem;margin-top:2px}
 /* Cards */
-.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;border:1px solid var(--border)}
+.card{background:var(--surface);border-radius:var(--radius-xl);box-shadow:var(--shadow);padding:20px;border:1px solid var(--border)}
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
 .stat-card{padding:18px}
 .stat-card .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:10px}
@@ -154,7 +161,7 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 /* Service grid */
 .service-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
 .service-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:18px;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow)}
-.service-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--steel-light)}
+.service-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--steel)}
 .service-card .srv-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:10px}
 .service-card h4{font-size:0.92rem;font-weight:600;margin-bottom:3px}
 .service-card .ministry{font-size:0.75rem;color:var(--steel);font-weight:500;margin-bottom:5px}
@@ -172,7 +179,7 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 table{width:100%;border-collapse:collapse;font-size:0.85rem}
 thead th{text-align:left;padding:10px 14px;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-secondary);border-bottom:2px solid var(--border);font-weight:600}
 tbody td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
-tbody tr:hover{background:#f8fafc}
+tbody tr:hover{background:var(--ministry-50,#EAF2FB)}
 .status-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;text-transform:capitalize}
 .status-submitted{background:#e3f2fd;color:#1565c0}
 .status-under_review{background:#fff3e0;color:#e65100}
@@ -190,13 +197,13 @@ tbody tr:hover{background:#f8fafc}
 .modal-body{padding:20px 24px}
 .modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
 /* Checkout */
-.checkout-summary{background:#f8fafc;border-radius:var(--radius-sm);padding:14px;margin-bottom:14px}
+.checkout-summary{background:var(--ministry-50,#EAF2FB);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px}
 .checkout-row{display:flex;justify-content:space-between;padding:6px 0;font-size:0.88rem}
 .checkout-row.total{border-top:2px solid var(--border);margin-top:6px;padding-top:10px;font-weight:700;font-size:0.95rem}
 .payment-channels{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pay-channel{display:flex;align-items:center;gap:8px;padding:12px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);background:white}
 .pay-channel:hover{border-color:var(--steel-light)}
-.pay-channel.selected{border-color:var(--steel);background:#eef5fb}
+.pay-channel.selected{border-color:var(--steel);background:#EAF2FB}
 .pay-channel input[type="radio"]{accent-color:var(--navy)}
 .prn-box{background:var(--navy);color:white;border-radius:var(--radius-sm);padding:18px;text-align:center;margin-top:14px}
 .prn-box .prn-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;opacity:0.7}
@@ -247,6 +254,11 @@ tbody tr:hover{background:#f8fafc}
 .sidebar-nav{scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
 .login-card{scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
 /* Responsive */
+@media(max-width:900px){
+  .login-page{grid-template-columns:1fr}
+  .login-brand{display:none}
+  .login-form-panel{padding:32px 24px;min-height:100vh}
+}
 @media(max-width:768px){
   .main-content{margin-left:0}
   .sidebar{position:fixed;z-index:101;transition:transform var(--duration-normal) var(--ease-out)}
@@ -278,17 +290,17 @@ tbody tr:hover{background:#f8fafc}
 .app-layout.sidebar-collapsed .main-content{margin-left:0}
 /* Clickable notification */
 .notif-item.clickable{padding:12px 20px;cursor:pointer;transition:background var(--transition)}
-.notif-item.clickable:hover{background:#f0f4f8}
+.notif-item.clickable:hover{background:var(--ministry-50,#EAF2FB)}
 .notif-item.clickable .notif-title{font-weight:600;font-size:0.88rem}
 .notif-item.clickable .notif-sub{font-size:0.75rem;color:var(--text-secondary)}
-.notif-item.unread{background:#eef5fb;border-left:3px solid var(--steel)}
+.notif-item.unread{background:#EAF2FB;border-left:3px solid var(--steel)}
 .notif-item.read{opacity:0.75}
 /* Ministry SVG logo */
 .m-logo-svg{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:10px;overflow:hidden}
 .m-logo-svg svg{width:100%;height:100%}
 /* Dashboard stat cards clickable */
 .stat-click{cursor:pointer;transition:all var(--transition)}
-.stat-click:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--steel-light)}
+.stat-click:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--steel)}
 /* Map search & controls */
 .map-controls{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .map-search-wrap{flex:1;min-width:180px;position:relative}
@@ -310,7 +322,7 @@ tbody tr:hover{background:#f8fafc}
 .legend-item{display:flex;align-items:center;gap:6px}
 .legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
 /* 2FA */
-.tfa-section{display:none;margin-top:14px;padding:16px;background:#f8fafc;border-radius:var(--radius-sm);border:1px solid var(--border)}
+.tfa-section{display:none;margin-top:14px;padding:16px;background:var(--ministry-50,#EAF2FB);border-radius:var(--radius-sm);border:1px solid var(--border)}
 .tfa-section.active{display:block}
 .tfa-code-inputs{display:flex;gap:8px;justify-content:center;margin:12px 0}
 .tfa-code-inputs input{width:40px;height:44px;text-align:center;font-size:1.2rem;font-weight:700;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit}
@@ -358,7 +370,7 @@ tbody tr:hover{background:#f8fafc}
 .help-faq .hq:hover{color:var(--steel)}
 .help-faq .ha{font-size:0.82rem;color:var(--text-secondary);padding:8px 0 4px;display:none;line-height:1.6}
 .help-faq.open .ha{display:block}
-.about-hero{background:linear-gradient(135deg,var(--navy),var(--navy-light));border-radius:var(--radius);padding:32px;color:white;margin-bottom:20px}
+.about-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--steel) 100%);border-radius:var(--radius-xl);padding:32px;color:white;margin-bottom:20px}
 .about-hero h2{font-size:1.3rem;margin-bottom:6px}
 .about-hero p{font-size:0.88rem;opacity:0.9;max-width:600px}
 .about-section{background:var(--surface);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:14px}
@@ -396,7 +408,7 @@ tbody tr:hover{background:#f8fafc}
 .stat-card .stat-value{transition:color var(--transition)}
 .stat-click:hover .stat-value{color:var(--steel)}
 .form-group input,.form-group select{transition:border-color var(--transition),box-shadow var(--transition)}
-.form-group input:focus,.form-group select:focus{box-shadow:0 0 0 3px rgba(46,107,158,0.12)}
+.form-group input:focus,.form-group select:focus{box-shadow:0 0 0 3px rgba(10,77,162,0.12)}
 .btn{position:relative;overflow:hidden}
 .btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.1);opacity:0;transition:opacity var(--transition)}
 .btn:active::after{opacity:1}
@@ -407,6 +419,14 @@ tbody tr:hover{background:#f8fafc}
 .refresh-indicator{font-size:0.7rem;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;opacity:0;transition:opacity 0.3s}
 .refresh-indicator.show{opacity:1}
 .overlay-page{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center}
+.overlay-page.active{display:flex}
+/* Decorative gradient blobs (GDR-inspired) */
+.bg-blobs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-blobs .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.06}
+.bg-blobs .blob-1{width:600px;height:600px;background:var(--steel);top:-200px;right:-100px}
+.bg-blobs .blob-2{width:400px;height:400px;background:var(--gold);bottom:-100px;left:-100px}
+.bg-blobs .blob-3{width:300px;height:300px;background:var(--steel-light);top:40%;left:60%}
+.main-content{position:relative;z-index:1}
 /* Utility classes */
 .d-flex{display:flex}.d-flex-center{display:flex;align-items:center}.d-flex-between{display:flex;align-items:center;justify-content:space-between}
 .d-grid{display:grid}.gap-xs{gap:4px}.gap-sm{gap:8px}.gap-md{gap:12px}.gap-lg{gap:16px}
@@ -449,8 +469,8 @@ tbody tr:hover{background:#f8fafc}
 /* Dark mode */
 [data-theme="dark"] {
   --bg: #0f1117; --surface: #1a1d27; --text: #e8eaed; --text-secondary: #9aa0a6;
-  --border: #2d3142; --navy: #1a3f7a; --navy-light: #2e569a; --steel: #4a8bc2;
-  --steel-light: #6aa8d8; --gold: #d4b85a; --gold-light: #e8d080;
+  --border: #2d3142; --navy: #062E5E; --navy-light: #0A4DA2; --steel: #4A9BE5;
+  --steel-light: #7DB8EE; --gold: #FFB81C; --gold-light: #FFD666; --ministry-50: #1a1d27;
   --shadow: 0 1px 3px rgba(0,0,0,0.3); --shadow-lg: 0 4px 16px rgba(0,0,0,0.4);
   --state-error-bg: #2d1517; --state-error-border: #ef4444; --state-error-text: #fca5a5;
   --state-success-bg: #162a1a; --state-success-border: #22c55e; --state-success-text: #86efac;
@@ -471,19 +491,21 @@ tbody tr:hover{background:#f8fafc}
 [data-theme="dark"] .search-bar input:focus{background:var(--surface)}
 [data-theme="dark"] .help-search input{background:var(--surface);color:var(--text);border-color:var(--border)}
 [data-theme="dark"] .pay-channel{background:var(--bg);border-color:var(--border)}
-[data-theme="dark"] .pay-channel.selected{background:rgba(46,107,158,0.15)}
+[data-theme="dark"] .pay-channel.selected{background:rgba(10,77,162,0.15)}
 [data-theme="dark"] .checkout-summary{background:var(--bg)}
+[data-theme="dark"] .tfa-section{background:var(--bg)}
 [data-theme="dark"] .settings-row{border-color:var(--border)}
 [data-theme="dark"] tbody tr:hover{background:rgba(255,255,255,0.03)}
 [data-theme="dark"] .toggle-slider{background:#3a3f52}
-[data-theme="dark"] .notif-item.unread{background:rgba(46,107,158,0.12)}
+[data-theme="dark"] .notif-item.unread{background:rgba(10,77,162,0.12)}
 [data-theme="dark"] .notif-item.clickable:hover{background:rgba(255,255,255,0.04)}
 [data-theme="dark"] .toast-success{background:#162a1a;color:#86efac;border-color:var(--state-success-border)}
 [data-theme="dark"] .toast-error{background:#2d1517;color:#fca5a5;border-color:var(--state-error-border)}
-[data-theme="dark"] .toast-info{background:rgba(46,107,158,0.2);color:#93c5fd;border-color:var(--steel-light)}
+[data-theme="dark"] .toast-info{background:rgba(74,155,229,0.2);color:#93c5fd;border-color:var(--steel-light)}
 [data-theme="dark"] .login-card{background:var(--surface)}
+[data-theme="dark"] .login-form-panel{background:var(--surface)}
 [data-theme="dark"] .pw-toggle:hover{background:rgba(255,255,255,0.08)}
-[data-theme="dark"] .about-hero{background:linear-gradient(135deg,#1a3f7a,#0c2d5e)}
+[data-theme="dark"] .about-hero{background:linear-gradient(135deg,#062E5E,#031C3E)}
 [data-theme="dark"] .modal{background:var(--surface)}
 [data-theme="dark"] .modal-overlay{background:rgba(0,0,0,0.7)}
 [data-theme="dark"] .tfa-section{background:var(--bg)}
@@ -497,7 +519,7 @@ tbody tr:hover{background:#f8fafc}
 .toast.toast-out{opacity:0;transform:translateX(100%)}
 .toast-success{background:var(--state-success-bg);color:var(--state-success-text);border:1px solid var(--state-success-border)}
 .toast-error{background:var(--state-error-bg);color:var(--state-error-text);border:1px solid var(--state-error-border)}
-.toast-info{background:#eef5fb;color:var(--navy);border:1px solid var(--steel-light)}
+.toast-info{background:#EAF2FB;color:var(--navy);border:1px solid var(--steel-light)}
 .toast .toast-icon{font-size:1.2rem;flex-shrink:0}
 .toast .toast-close{background:none;border:none;cursor:pointer;margin-left:auto;padding:2px;opacity:0.6;font-size:1.1rem;line-height:1;color:inherit}
 .toast .toast-close:hover{opacity:1}
@@ -516,53 +538,59 @@ tbody tr:hover{background:#f8fafc}
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <div id="offlineBar" class="offline-bar" role="alert">You are offline. Some features may be unavailable.</div>
 
-<!-- Login -->
+<!-- Login - GDR-inspired two-panel -->
 <div id="loginPage" class="login-page">
-  <div class="ken-burns-bg"></div>
-  <div class="login-overlay"></div>
-  <div class="login-card" role="dialog" aria-label="Login">
-    <img class="coat-of-arms" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms">
-    <h1>Unified Government Service Portal</h1>
-    <p class="subtitle">Republic of Uganda — UGPass Single Sign-On</p>
-    <form id="loginForm" onsubmit="doLogin();return false" autocomplete="off" novalidate>
-    <div class="form-group"><label for="loginNin">National ID (NIN)</label><input type="text" id="loginNin" placeholder="e.g. T1234567890" autocomplete="username" aria-required="true" aria-describedby="loginError"></div>
-    <div class="form-group"><label for="loginPass">Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="UGPass password" autocomplete="current-password" aria-required="true" aria-describedby="loginError"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('loginPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
-    <div class="d-flex-between" style="margin:6px 0 14px"><label class="d-flex-center gap-sm" style="font-size:0.8rem;cursor:pointer"><input type="checkbox" id="loginRemember" checked style="accent-color:var(--navy);width:16px;height:16px"> Remember me</label><button type="button" class="btn-link" onclick="showForgotPassword()">Forgot password?</button></div>
-    <button type="submit" class="btn btn-primary" id="loginBtn"><span id="loginBtnText">Sign in with UGPass</span><span id="loginSpinner" class="material-icons-round spin" style="display:none">hourglass_top</span></button>
-    </form>
-    <p class="login-error" id="loginError" role="alert"></p>
-    <div class="tfa-section" id="tfaSection">
-      <div class="fw-600" style="font-size:0.85rem;margin-bottom:4px">Two-Factor Authentication</div>
-      <div class="tfa-device"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">smartphone</span> Enter the 6-digit code sent to your registered device</div>
-      <div class="tfa-code-inputs" id="tfaInputs">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,1)" onkeydown="tfaBack(this,0)" autofocus>
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,2)" onkeydown="tfaBack(this,1)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,3)" onkeydown="tfaBack(this,2)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,4)" onkeydown="tfaBack(this,3)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,5)" onkeydown="tfaBack(this,4)">
-        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaSubmitCheck()" onkeydown="tfaBack(this,5)">
+  <div class="login-brand">
+    <img class="coa" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms">
+    <h1>Unified Government<br>Service Portal</h1>
+    <p class="brand-sub">Republic of Uganda &mdash; UGPass Single Sign-On</p>
+    <span class="brand-tag">&#9670; Government of Uganda</span>
+  </div>
+  <div class="login-form-panel">
+    <div class="login-form-wrap">
+      <img class="form-logo-desktop" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms">
+      <div class="login-card">
+        <h1>Welcome Back</h1>
+        <p class="subtitle">Sign in to access government services</p>
+        <form id="loginForm" onsubmit="doLogin();return false" autocomplete="off" novalidate>
+        <div class="form-group"><label for="loginNin">National ID (NIN)</label><input type="text" id="loginNin" placeholder="e.g. AT1234567890" autocomplete="username" aria-required="true" aria-describedby="loginError"></div>
+        <div class="form-group"><label for="loginPass">Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="Enter your UGPass password" autocomplete="current-password" aria-required="true" aria-describedby="loginError"><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('loginPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
+        <div class="d-flex-between" style="margin:6px 0 14px"><label class="d-flex-center gap-sm" style="font-size:0.8rem;cursor:pointer"><input type="checkbox" id="loginRemember" checked style="accent-color:var(--navy);width:16px;height:16px"> Remember me</label><button type="button" class="btn-link" onclick="showForgotPassword()">Forgot password?</button></div>
+        <button type="submit" class="btn btn-primary" id="loginBtn"><span id="loginBtnText">Sign in with UGPass</span><span id="loginSpinner" class="material-icons-round spin" style="display:none">hourglass_top</span></button>
+        </form>
+        <p class="login-error" id="loginError" role="alert"></p>
+        <div class="tfa-section" id="tfaSection">
+          <div class="fw-600" style="font-size:0.85rem;margin-bottom:4px">Two-Factor Authentication</div>
+          <div class="tfa-device"><span class="material-icons-round" style="font-size:14px;vertical-align:middle">smartphone</span> Enter the 6-digit code sent to your registered device</div>
+          <div class="tfa-code-inputs" id="tfaInputs">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,1)" onkeydown="tfaBack(this,0)" autofocus>
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,2)" onkeydown="tfaBack(this,1)">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,3)" onkeydown="tfaBack(this,2)">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,4)" onkeydown="tfaBack(this,3)">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaMove(this,5)" onkeydown="tfaBack(this,4)">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" oninput="tfaSubmitCheck()" onkeydown="tfaBack(this,5)">
+          </div>
+          <button class="btn btn-primary" id="tfaBtn" onclick="verify2FA()" disabled>Verify Code</button>
+          <p class="text-secondary text-xs mt-sm">Code sent to registered device</p>
+        </div>
+        <div class="separator" id="loginSeparator">or</div>
+        <button type="button" class="btn btn-secondary w-full" id="loginRegisterBtn" onclick="showRegister()">Create an Account</button>
+        <p class="login-footer">Demo: <strong>AT1234567890</strong> / pass123 &middot; Powered by <strong>UGPass</strong></p>
       </div>
-      <button class="btn btn-primary" id="tfaBtn" onclick="verify2FA()" disabled>Verify Code</button>
-      <p class="text-secondary text-xs mt-sm">Code: <strong id="tfaDemoCode">------</strong> (demo)</p>
     </div>
-    <div class="separator" id="loginSeparator">or</div>
-    <button type="button" class="btn btn-secondary w-full" id="loginRegisterBtn" onclick="showRegister()">Create an Account</button>
-    <p class="login-footer">Demo: <strong>T1234567890</strong> / pass123 &middot; Powered by <strong>UGPass</strong></p>
   </div>
 </div>
 
 <!-- Register -->
-<div id="registerPage" class="overlay-page">
-  <div class="ken-burns-bg"></div>
-  <div class="login-overlay"></div>
-  <div class="login-card" style="width:480px;max-height:90vh;overflow-y:auto;border-radius:20px">
-    <img class="coat-of-arms" src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms" style="width:80px;height:80px">
+<div id="registerPage" class="overlay-page" style="background:rgba(3,28,62,0.85)">
+  <div class="login-card" style="width:480px;max-height:90vh;overflow-y:auto;border-radius:var(--radius-xl);background:var(--surface);padding:32px 28px;box-shadow:var(--shadow-xl)">
+    <img src="/static/coat-of-arms.jpg" alt="Uganda Coat of Arms" style="width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 8px">
     <h1>Create Account</h1>
     <p class="subtitle">Register for a UGSP account</p>
     <div id="registerError" class="login-error"></div>
     <form id="regForm" onsubmit="doRegister();return false">
     <div class="form-group"><label for="regName">Full Name</label><input type="text" id="regName" placeholder="e.g. Grace Akello" required></div>
-    <div class="form-group"><label for="regNin">National ID (NIN)</label><input type="text" id="regNin" placeholder="e.g. T1234567890" required></div>
+    <div class="form-group"><label for="regNin">National ID (NIN)</label><input type="text" id="regNin" placeholder="e.g. AT1234567890" required></div>
     <div class="form-group"><label for="regEmail">Email</label><input type="email" id="regEmail" placeholder="grace@example.com" required></div>
     <div class="form-group"><label for="regPhone">Phone</label><input type="text" id="regPhone" placeholder="+256 700 000 000" required></div>
     <div class="form-group"><label for="regCategory">Category</label><select id="regCategory"><option value="citizen">Citizen</option><option value="business">Business</option><option value="visitor">Visitor</option></select></div>
@@ -574,14 +602,14 @@ tbody tr:hover{background:#f8fafc}
 </div>
 
 <!-- Forgot Password -->
-<div id="forgotPage" class="overlay-page" style="background:rgba(0,0,0,0.6)">
-  <div class="login-card" style="width:420px;text-align:center">
+<div id="forgotPage" class="overlay-page" style="background:rgba(3,28,62,0.85)">
+  <div class="login-card" style="width:420px;text-align:center;background:var(--surface);border-radius:var(--radius-xl);padding:32px 28px;box-shadow:var(--shadow-xl)">
     <div class="login-logo" style="font-size:28px;background:var(--gold);color:var(--navy)">&#128274;</div>
     <h1>Reset Password</h1>
     <p class="subtitle" id="forgotStep">Step 1: Enter your NIN</p>
     <div id="forgotError" class="login-error"></div>
     <form id="forgotForm" onsubmit="forgotStep2();return false">
-    <div class="form-group" id="forgotNinGroup"><label for="forgotNin">National ID (NIN)</label><input type="text" id="forgotNin" placeholder="e.g. T1234567890" required></div>
+    <div class="form-group" id="forgotNinGroup"><label for="forgotNin">National ID (NIN)</label><input type="text" id="forgotNin" placeholder="e.g. AT1234567890" required></div>
     <div class="form-group" id="forgotCodeGroup" style="display:none"><label for="forgotCode">Reset Code</label><input type="text" id="forgotCode" placeholder="Enter the code sent to you" required></div>
     <div class="form-group" id="forgotNewPassGroup" style="display:none"><label for="forgotNewPass">New Password</label><div class="pw-wrap"><input type="password" id="forgotNewPass" placeholder="Enter new password (min 6 chars)" required><button type="button" class="pw-toggle material-icons-round" onclick="togglePw('forgotNewPass',this)" aria-label="Toggle password visibility" tabindex="-1">visibility_off</button></div></div>
     <button class="btn btn-primary" id="forgotBtn" type="submit">Send Reset Code</button>
@@ -623,11 +651,12 @@ tbody tr:hover{background:#f8fafc}
     </nav>
     <div class="sidebar-mobile-backdrop" id="sidebarBackdrop" onclick="toggleSidebarCollapse()"></div>
     <div class="sidebar-footer">
-      <div class="user-info"><div class="user-avatar" id="userAvatar">G</div><div class="user-details"><div class="user-name" id="userName">Grace Akello</div><div class="user-nin" id="userNin">T1234567890</div></div><span class="beta-badge" id="betaBadge" style="display:none;font-size:0.6rem;background:var(--gold);color:var(--navy);padding:2px 6px;border-radius:4px;font-weight:700;margin-right:4px">BETA</span><button class="logout-btn material-icons-round" onclick="doLogout()" aria-label="Sign out">logout</button></div>
+      <div class="user-info"><div class="user-avatar" id="userAvatar">G</div><div class="user-details"><div class="user-name" id="userName">Grace Akello</div><div class="user-nin" id="userNin">AT1234567890</div></div><span class="beta-badge" id="betaBadge" style="display:none;font-size:0.6rem;background:var(--gold);color:var(--navy);padding:2px 6px;border-radius:4px;font-weight:700;margin-right:4px">BETA</span><button class="logout-btn material-icons-round" onclick="doLogout()" aria-label="Sign out">logout</button></div>
     </div>
   </aside>
 
   <main class="main-content" id="main-content" tabindex="-1">
+    <div class="bg-blobs" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
     <header class="top-bar">
       <button class="sidebar-toggle material-icons-round" onclick="toggleSidebarCollapse()" id="sidebarToggle" title="Collapse sidebar" aria-label="Collapse sidebar">menu</button>
       <div class="search-bar" role="search"><span class="search-icon material-icons-round">search</span><input type="search" id="quickSearch" placeholder="Search services, ministries..." onkeydown="if(event.key==='Enter')quickSearchGo()" aria-label="Search"></div>
@@ -699,7 +728,7 @@ tbody tr:hover{background:#f8fafc}
           <span class="legend-item"><span class="legend-dot" style="background:#e65100"></span>Education</span>
           <span class="legend-item"><span class="legend-dot" style="background:#7b1fa2"></span>Service Centre</span>
           <span class="legend-item"><span class="legend-dot" style="background:#c62828"></span>Security</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#c8a84e"></span>Financial</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#FFB81C"></span>Financial</span>
         </div>
       </div>
     </div>
@@ -1283,7 +1312,7 @@ async function loadDashActivity() {
     const max = Math.max(...binned, 1);
     container.innerHTML = `<div class="d-flex-between mb-sm"><h4 style="font-size:0.9rem;font-weight:600"><span class="material-icons-round" style="font-size:16px;vertical-align:middle">history</span> Activity Heatmap (7 days)</h4></div><div class="d-flex-center gap-sm" style="justify-content:space-around">${binned.map((v, i) => {
       const intensity = Math.max(10, Math.round(30 + (v / max) * 60));
-      return `<div style="text-align:center"><div style="width:28px;height:28px;border-radius:6px;background:rgba(46,107,158,${v/max || 0.08});display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:${v > 0 ? 'white' : 'var(--text-secondary)'}">${v||''}</div><span style="font-size:0.6rem;color:var(--text-secondary)">${weekDays[i]}</span></div>`;
+      return `<div style="text-align:center"><div style="width:28px;height:28px;border-radius:6px;background:rgba(10,77,162,${v/max || 0.08});display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:${v > 0 ? 'white' : 'var(--text-secondary)'}">${v||''}</div><span style="font-size:0.6rem;color:var(--text-secondary)">${weekDays[i]}</span></div>`;
     }).join('')}</div>`;
     document.getElementById('statGrid').after(container);
   } catch(e) { /* non-critical */ }
@@ -1351,7 +1380,7 @@ function updatePayFields(channel) {
   document.querySelector(`input[name="channel"][value="${channel}"]`).checked = true;
   const cfg = PAY_FIELD_CONFIG[channel];
   if (!cfg) { document.getElementById('payFields').innerHTML = ''; return; }
-  document.getElementById('payFields').innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="material-icons-round" style="color:var(--steel)">${cfg.icon}</span><span style="font-weight:600;font-size:0.85rem;text-transform:capitalize">${channel.replace(/_/g,' ')} Details</span></div>` + cfg.fields.map(f => `<div class="form-group" style="margin-bottom:8px"><label for="${f.id}">${f.label}</label><input type="${f.type}" id="${f.id}" placeholder="${f.placeholder}" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;transition:border-color var(--transition);background:#fafbfc" onfocus="this.style.borderColor='var(--steel)';this.style.background='white'" onblur="this.style.borderColor='var(--border)';this.style.background='#fafbfc'"></div>`).join('');
+  document.getElementById('payFields').innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="material-icons-round" style="color:var(--steel)">${cfg.icon}</span><span style="font-weight:600;font-size:0.85rem;text-transform:capitalize">${channel.replace(/_/g,' ')} Details</span></div>` + cfg.fields.map(f => `<div class="form-group" style="margin-bottom:8px"><label for="${f.id}">${f.label}</label><input type="${f.type}" id="${f.id}" placeholder="${f.placeholder}" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.85rem;transition:border-color var(--transition);background:#fafbfc" onfocus="this.style.borderColor='var(--steel)';this.style.background='var(--surface)'" onblur="this.style.borderColor='var(--border)';this.style.background='var(--ministry-50)'"></div>`).join('');
 }
 function openCheckout(service) {
   document.getElementById('checkoutSummary').innerHTML = `<div class="checkout-row"><span>${service.name}</span><span>UGX ${service.fee.toLocaleString()}</span></div><div class="checkout-row total"><span>Total</span><span>UGX ${service.fee.toLocaleString()}</span></div>`;
@@ -1467,10 +1496,10 @@ function loadLeaflet() {
 
 // ===== MINISTRIES =====
 const MINISTRY_LOGOS = {
-  'NIRA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><text x="20" y="24" text-anchor="middle" fill="white" font-size="12" font-weight="800" font-family="Inter">NIRA</text><circle cx="20" cy="8" r="3" fill="#c8a84e"/></svg>`},
+  'NIRA':{c:'#031C3E',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#031C3E"/><text x="20" y="24" text-anchor="middle" fill="white" font-size="12" font-weight="800" font-family="Inter">NIRA</text><circle cx="20" cy="8" r="3" fill="#FFB81C"/></svg>`},
   'MIA':{c:'#922b21',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#922b21"/><path d="M20 6l-8 6v6c0 6 3.5 11.5 8 13 4.5-1.5 8-7 8-13v-6z" fill="none" stroke="white" stroke-width="2"/><text x="20" y="30" text-anchor="middle" fill="white" font-size="8" font-weight="700">MIA</text></svg>`},
   'URSB':{c:'#1f618d',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1f618d"/><path d="M12 10h16v20H12z" fill="none" stroke="white" stroke-width="2"/><path d="M16 16h8M16 20h8M16 24h8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="6" font-weight="700">URSB</text></svg>`},
-  'URA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><path d="M12 26l4-12 4 8 4-8 4 12" fill="none" stroke="#c8a84e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="7" font-weight="700">URA</text></svg>`},
+  'URA':{c:'#031C3E',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#031C3E"/><path d="M12 26l4-12 4 8 4-8 4 12" fill="none" stroke="#FFB81C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="7" font-weight="700">URA</text></svg>`},
   'NSSF':{c:'#196f3d',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#196f3d"/><circle cx="20" cy="18" r="8" fill="none" stroke="white" stroke-width="2"/><text x="20" y="21" text-anchor="middle" fill="white" font-size="8" font-weight="800">NSSF</text></svg>`},
   'UBOS':{c:'#2c3e50',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2c3e50"/><rect x="10" y="20" width="4" height="10" fill="#85c1e9"/><rect x="16" y="14" width="4" height="16" fill="#f9e79f"/><rect x="22" y="8" width="4" height="22" fill="#76d7c4"/><rect x="28" y="16" width="4" height="14" fill="#f1948a"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="6" font-weight="700">UBOS</text></svg>`},
   'UNRA':{c:'#b7950b',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#b7950b"/><path d="M10 30l4-10h12l4 10" fill="none" stroke="white" stroke-width="2"/><rect x="14" y="20" width="12" height="3" fill="white"/><circle cx="15" cy="28" r="2" fill="white"/><circle cx="25" cy="28" r="2" fill="white"/><text x="20" y="36" text-anchor="middle" fill="white" font-size="5" font-weight="700">UNRA</text></svg>`},
@@ -1478,23 +1507,23 @@ const MINISTRY_LOGOS = {
   'MoES':{c:'#2471a3',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2471a3"/><path d="M20 8l-8 6v8l8 6 8-6v-8z" fill="none" stroke="white" stroke-width="2"/><text x="20" y="21" text-anchor="middle" fill="white" font-size="10" font-weight="800">MoES</text></svg>`},
   'MAAIF':{c:'#1e8449',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1e8449"/><path d="M20 8c0 0-6 4-6 10s6 10 6 10 6-4 6-10-6-10-6-10z" fill="none" stroke="#f9e79f" stroke-width="2"/><path d="M18 14l2-2 2 2" fill="none" stroke="white" stroke-width="1.5"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MAAIF</text></svg>`},
   'MoWE':{c:'#2980b9',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2980b9"/><path d="M14 24c0-6 6-12 6-12s6 6 6 12-2.7 6-6 6-6-2.7-6-6z" fill="none" stroke="white" stroke-width="2"/><text x="20" y="34" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoWE</text></svg>`},
-  'MoFPED':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><circle cx="20" cy="18" r="8" fill="none" stroke="#c8a84e" stroke-width="2"/><text x="20" y="21" text-anchor="middle" fill="#c8a84e" font-size="7" font-weight="800">UGX</text></svg>`},
-  'MoLG':{c:'#2e6b9e',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2e6b9e"/><path d="M12 26l8-12 8 12" fill="none" stroke="white" stroke-width="2"/><rect x="16" y="18" width="8" height="8" fill="none" stroke="white" stroke-width="1.5"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoLG</text></svg>`},
+  'MoFPED':{c:'#031C3E',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#031C3E"/><circle cx="20" cy="18" r="8" fill="none" stroke="#FFB81C" stroke-width="2"/><text x="20" y="21" text-anchor="middle" fill="#FFB81C" font-size="7" font-weight="800">UGX</text></svg>`},
+  'MoLG':{c:'#0A4DA2',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#0A4DA2"/><path d="M12 26l8-12 8 12" fill="none" stroke="white" stroke-width="2"/><rect x="16" y="18" width="8" height="8" fill="none" stroke="white" stroke-width="1.5"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoLG</text></svg>`},
   'MoGLSD':{c:'#6c3483',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#6c3483"/><circle cx="20" cy="14" r="4" fill="none" stroke="white" stroke-width="1.5"/><path d="M14 28c0-5 6-5 6-5s6 0 6 5" fill="none" stroke="white" stroke-width="2"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoGLSD</text></svg>`},
-  'MoJCA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><rect x="14" y="8" width="12" height="24" rx="2" fill="none" stroke="#c8a84e" stroke-width="2"/><line x1="14" y1="14" x2="26" y2="14" stroke="#c8a84e" stroke-width="1.5"/><text x="20" y="34" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoJCA</text></svg>`},
+  'MoJCA':{c:'#031C3E',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#031C3E"/><rect x="14" y="8" width="12" height="24" rx="2" fill="none" stroke="#FFB81C" stroke-width="2"/><line x1="14" y1="14" x2="26" y2="14" stroke="#FFB81C" stroke-width="1.5"/><text x="20" y="34" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoJCA</text></svg>`},
   'MoICT':{c:'#1f618d',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1f618d"/><circle cx="20" cy="20" r="6" fill="none" stroke="white" stroke-width="2"/><path d="M10 20h4M26 20h4M20 10v4M20 26v4" stroke="white" stroke-width="1.5"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoICT</text></svg>`},
   'MoPS':{c:'#2c3e50',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2c3e50"/><ellipse cx="20" cy="14" rx="6" ry="4" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 28c0-6 8-6 8-6s8 0 8 6" fill="none" stroke="white" stroke-width="2"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoPS</text></svg>`},
   'MoLHUD':{c:'#7b7d7d',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#7b7d7d"/><path d="M12 28V16l8-8 8 8v12H12z" fill="none" stroke="white" stroke-width="2"/><rect x="17" y="20" width="6" height="8" fill="white"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoLHUD</text></svg>`},
   'MoTWA':{c:'#1a6e5c',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a6e5c"/><path d="M20 8c-4 0-8 4-8 8 0 6 8 14 8 14s8-8 8-14c0-4-4-8-8-8z" fill="none" stroke="white" stroke-width="2"/><circle cx="20" cy="16" r="3" fill="white"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">MoTWA</text></svg>`},
-  'MoFA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><circle cx="20" cy="18" r="10" fill="none" stroke="white" stroke-width="1.5"/><path d="M10 18h20M14 12s6-3 6-3 6 3 6 3M14 24s6 3 6 3 6-3 6-3" stroke="white" stroke-width="1" opacity="0.5"/><text x="20" y="21" text-anchor="middle" fill="white" font-size="7" font-weight="700">MoFA</text></svg>`},
-  'UNBS':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><path d="M12 10h16l-4 10 4 10H12l4-10z" fill="none" stroke="#c8a84e" stroke-width="2"/><text x="20" y="22" text-anchor="middle" fill="#c8a84e" font-size="8" font-weight="800">UNBS</text></svg>`},
+  'MoFA':{c:'#031C3E',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#031C3E"/><circle cx="20" cy="18" r="10" fill="none" stroke="white" stroke-width="1.5"/><path d="M10 18h20M14 12s6-3 6-3 6 3 6 3M14 24s6 3 6 3 6-3 6-3" stroke="white" stroke-width="1" opacity="0.5"/><text x="20" y="21" text-anchor="middle" fill="white" font-size="7" font-weight="700">MoFA</text></svg>`},
+  'UNBS':{c:'#031C3E',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#031C3E"/><path d="M12 10h16l-4 10 4 10H12l4-10z" fill="none" stroke="#FFB81C" stroke-width="2"/><text x="20" y="22" text-anchor="middle" fill="#FFB81C" font-size="8" font-weight="800">UNBS</text></svg>`},
   'NWSC':{c:'#2471a3',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#2471a3"/><path d="M20 8c-2 0-6 6-6 12s3 10 6 10 6-4 6-10-4-12-6-12z" fill="none" stroke="white" stroke-width="2"/><path d="M16 18l4-4 4 4" fill="none" stroke="white" stroke-width="1.5"/><text x="20" y="34" text-anchor="middle" fill="white" font-size="5" font-weight="700">NWSC</text></svg>`},
-  'KCCA':{c:'#1a5276',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1a5276"/><rect x="14" y="14" width="12" height="16" fill="none" stroke="white" stroke-width="2"/><path d="M16 14V8h8v6" fill="none" stroke="white" stroke-width="2"/><rect x="17" y="22" width="6" height="8" fill="white"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">KCCA</text></svg>`},
+  'KCCA':{c:'#031C3E',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#031C3E"/><rect x="14" y="14" width="12" height="16" fill="none" stroke="white" stroke-width="2"/><path d="M16 14V8h8v6" fill="none" stroke="white" stroke-width="2"/><rect x="17" y="22" width="6" height="8" fill="white"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">KCCA</text></svg>`},
   'UWA':{c:'#1e8449',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#1e8449"/><path d="M20 8c-4 0-6 3-6 6 0 4 6 10 6 10s6-6 6-10c0-3-2-6-6-6z" fill="none" stroke="white" stroke-width="2"/><path d="M13 30l14-2" stroke="white" stroke-width="2" stroke-linecap="round"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">UWA</text></svg>`},
   'NITA':{c:'#6c3483',svg:`<svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#6c3483"/><rect x="12" y="10" width="16" height="20" rx="2" fill="none" stroke="white" stroke-width="2"/><circle cx="20" cy="18" r="3" fill="none" stroke="white" stroke-width="1.5"/><path d="M16 26c0-3 4-3 4-3s4 0 4 3" fill="none" stroke="white" stroke-width="1.5"/><text x="20" y="35" text-anchor="middle" fill="white" font-size="5" font-weight="700">NITA</text></svg>`},
 };
 const MINISTRY_COLORS = {
-  'ministry':'#0c2d5e','agency':'#2e6b9e','authority':'#c8a84e','fund':'#2e7d32','commission':'#7b1fa2','security':'#c62828',
+  'ministry':'#031C3E','agency':'#0A4DA2','authority':'#FFB81C','fund':'#2e7d32','commission':'#7b1fa2','security':'#c62828',
 };
 async function loadMinistries() {
   try {
@@ -1502,7 +1531,7 @@ async function loadMinistries() {
     const data = await api('GET',`/catalogue/ministries/search?q=${encodeURIComponent(q||'')}`);
     document.getElementById('ministryGrid').innerHTML = data.map(m => {
       const logo = MINISTRY_LOGOS[m.name];
-      const mc = MINISTRY_COLORS[m.category] || '#2e6b9e';
+      const mc = MINISTRY_COLORS[m.category] || '#0A4DA2';
       return `<div class="ministry-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="m-logo-svg">${logo ? logo.svg : '<div style="width:40px;height:40px;border-radius:10px;background:'+mc+';color:white;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700">'+(m.name.charAt(0))+'</div>'}</div><div style="flex:1;min-width:0"><div class="m-name">${m.name}</div><div class="m-full">${m.full_name}</div></div></div><span class="m-cat" style="background:${mc}18;color:${mc}">${m.category}</span><a class="m-link" href="${m.website}" target="_blank" rel="noopener"><span class="material-icons-round" style="font-size:14px">open_in_new</span> Visit website</a></div>`;
     }).join('');
   } catch(e) { console.warn('Failed to load ministries:', e); }
@@ -1533,7 +1562,7 @@ const MAP_LOCATIONS = [
   { name: 'Kawempe National Referral Hospital', lat: 0.3450, lng: 32.5600, desc: 'Kampala', type: 'health' },
   { name: 'Kyambogo University', lat: 0.3420, lng: 32.6100, desc: 'Kampala', type: 'education' },
 ];
-const MAP_COLORS = { ministry:'#1565c0', health:'#2e7d32', education:'#e65100', service_centre:'#7b1fa2', security:'#c62828', financial:'#c8a84e' };
+const MAP_COLORS = { ministry:'#1565c0', health:'#2e7d32', education:'#e65100', service_centre:'#7b1fa2', security:'#c62828', financial:'#FFB81C' };
 
 function initMap() {
   if (mapInitialized) { document.getElementById('ugandaMap')._leaflet_id && setTimeout(() => window.dispatchEvent(new Event('resize')), 100); return; }
@@ -1647,10 +1676,10 @@ async function loadDocuments() {
     const active = docs.filter(d => d.status === 'active').length;
     stats.innerHTML = `<div class="stat-card stat-small"><div class="stat-value" style="font-size:1.1rem">${total}</div><div class="stat-label">Total</div></div><div class="stat-card stat-small"><div class="stat-value" style="font-size:1.1rem">${active}</div><div class="stat-label">Active</div></div>`;
     if (!docs.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">folder_off</div><h4>No documents</h4></div>'; return; }
-    const typeColors = {'National ID':'#1a5276','Passport':'#c62828','Certificate':'#2e7d32','Permit':'#e65100','Receipt':'#6c3483','License':'#00838f'};
+    const typeColors = {'National ID':'#031C3E','Passport':'#c62828','Certificate':'#2e7d32','Permit':'#e65100','Receipt':'#6c3483','License':'#00838f'};
     const typeIcons = {'National ID':'badge','Passport':'flight','Certificate':'verified','Permit':'assignment','Receipt':'receipt','License':'license'};
     grid.innerHTML = docs.map(d => {
-      const c = typeColors[d.type] || '#2e6b9e';
+      const c = typeColors[d.type] || '#0A4DA2';
       const ic = typeIcons[d.type] || 'description';
       const safeId = d.id.replace(/'/g,"\\'");
       return `<div class="doc-card"><div class="doc-icon" style="background:${c}18;color:${c}"><span class="material-icons-round">${ic}</span></div><div class="doc-info"><div class="d-name">${d.name}</div><div class="d-meta">${d.type} &middot; Issued ${d.issued}${d.expiry ? ' &middot; Exp '+d.expiry : ''} &middot; ${d.file_size}</div></div><span class="doc-badge ${d.status}">${d.status}</span><button class="doc-dl material-icons-round" onclick="downloadDoc('${safeId}','${d.name.replace(/'/g,"\\'")}')" title="Download ${d.name}" aria-label="Download ${d.name}">download</button></div>`;
