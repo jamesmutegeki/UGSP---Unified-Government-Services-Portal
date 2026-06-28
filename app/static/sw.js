@@ -4,7 +4,6 @@ const STATIC_URLS = [
   '/static/manifest.json',
   '/static/coat-of-arms.jpg',
   '/static/jinja-sunset.jpg',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap',
   'https://fonts.googleapis.com/icon?family=Material+Icons+Round',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',

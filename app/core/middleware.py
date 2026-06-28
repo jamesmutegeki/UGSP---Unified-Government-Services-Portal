@@ -33,14 +33,19 @@ class DPPAComplianceMiddleware(BaseHTTPMiddleware):
         return response
 
 
-def verify_token_dependency(token: str) -> dict | None:
-    if not token or not token.startswith("ugpass_"):
-        return None
-    parts = token.replace("ugpass_", "", 1).split("_", 1)
-    if len(parts) < 1 or len(parts[0]) < 10:
-        return None
-    return {
-        "nin": parts[0],
-        "name": f"Citizen {parts[0][:4]}",
-        "email": f"{parts[0]}@ugpass.go.ug",
-    }
+_RATE_WINDOW = 60
+_RATE_LIMIT = 100
+_rate_store: dict[str, list[float]] = {}
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+        now = time.time()
+        client_ip = request.client.host if request.client else "unknown"
+        window = _rate_store.get(client_ip, [])
+        window = [t for t in window if now - t < _RATE_WINDOW]
+        if len(window) >= _RATE_LIMIT:
+            return Response(status_code=429, content="Rate limit exceeded. Try again later.")
+        window.append(now)
+        _rate_store[client_ip] = window
+        return await call_next(request)

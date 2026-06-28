@@ -6,12 +6,11 @@
 <title>UGSP — Unified Government Service Portal</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇺🇬</text></svg>">
 <link rel="manifest" href="/static/manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'">
 <style>
 :root {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
   --navy: #0c2d5e; --navy-light: #1a3f7a; --steel: #2e6b9e; --steel-light: #4a8bc2;
   --gold: #c8a84e; --gold-light: #e0c66a; --bg: #f0f2f5; --surface: #ffffff;
   --text: #1a1a2e; --text-secondary: #5a6a7e; --border: #dce0e5;
@@ -19,7 +18,7 @@
   --radius: 12px; --radius-sm: 8px;
   --shadow: 0 1px 3px rgba(12,45,94,0.08), 0 1px 2px rgba(12,45,94,0.06);
   --shadow-lg: 0 4px 16px rgba(12,45,94,0.12);
-  --sidebar-w: 260px; --top-h: 64px; --transition: 0.2s ease;
+  --sidebar-w: 260px; --top-h: 64px; --transition: 0.2s ease; --spring: cubic-bezier(0.34,1.56,0.64,1);
   /* State tokens */
   --state-loading: color-mix(in srgb, var(--steel) 20%, transparent);
   --state-error-bg: #fef2f2;
@@ -44,7 +43,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;scroll-behavior:smooth}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
 a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 .skip-link{position:absolute;top:-100px;left:8px;background:var(--navy);color:white;padding:8px 16px;border-radius:4px;z-index:9999;font-size:0.85rem}
 .skip-link:focus{top:8px}
@@ -66,6 +65,8 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 .form-group label{display:block;font-size:0.78rem;font-weight:600;margin-bottom:4px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.03em}
 .form-group input,.form-group select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;font-family:inherit;transition:border-color var(--transition);background:#fafbfc}
 .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--steel);background:white}
+.form-group input:user-invalid,.form-group select:user-invalid{border-color:var(--error)!important;background:#fef2f2!important}
+.form-group input:user-valid{border-color:var(--success)!important}
 .form-group select{appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%235a6a7e'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 12px center/12px no-repeat #fafbfc}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:var(--radius-sm);border:none;font-family:inherit;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all var(--transition)}
 .btn-primary{background:var(--navy);color:white;width:100%;padding:14px}
@@ -90,9 +91,9 @@ a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
 /* App layout */
 .app-layout{display:none;min-height:100vh}.app-layout.active{display:flex}
 /* Sidebar */
-.sidebar{width:var(--sidebar-w);background:var(--navy);color:white;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100;transition:transform var(--transition)}
+.sidebar{width:var(--sidebar-w);background:var(--navy);color:white;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:100;transition:transform 0.3s var(--spring)}
 .sidebar-header{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.1);min-height:var(--top-h)}
-.sidebar-toggle{background:none;border:none;color:var(--text);cursor:pointer;padding:6px;border-radius:6px;font-size:1.4rem;display:flex;align-items:center;justify-content:center;transition:background var(--transition)}
+.sidebar-toggle{background:none;border:none;color:var(--text);cursor:pointer;padding:6px;border-radius:6px;font-size:1.4rem;display:flex;align-items:center;justify-content:center;transition:background 0.2s ease}
 .sidebar-toggle:hover{background:rgba(0,0,0,0.05)}
 .sidebar-header .logo{width:38px;height:38px;flex-shrink:0;fill:var(--gold)}
 .sidebar-header .logo-text h2{font-size:0.9rem;font-weight:600;line-height:1.1}
@@ -505,6 +506,9 @@ tbody tr:hover{background:#f8fafc}
 .offline-bar{display:none;position:sticky;top:0;z-index:9999;background:#fef3cd;color:#856404;text-align:center;padding:6px 16px;font-size:0.8rem;font-weight:500}
 .offline-bar.show{display:block}
 [data-theme="dark"] .offline-bar{background:#3d2e00;color:#fbbf24}
+@media (prefers-reduced-motion:reduce){
+  *,.skeleton,.card,.toast,.modal-overlay,.notif-panel,.sidebar,.spin{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
+}
 
 </style>
 </head>
@@ -1051,7 +1055,6 @@ function doLogin() {
       document.getElementById('loginRegisterBtn').style.display = 'none';
       document.getElementById('tfaSection').classList.add('active');
       document.getElementById('tfaInputs').querySelector('input').focus();
-      document.getElementById('tfaDemoCode').textContent = d.demo_2fa_code || '123456';
       showMsg('success','Verification code sent to your registered device');
     })
     .catch(e => { errEl.textContent = e.message; btn.disabled = false; btn.querySelector('#loginBtnText').textContent = 'Sign in with UGPass'; btn.querySelector('#loginSpinner').style.display = 'none'; });
@@ -1221,6 +1224,7 @@ function closeModal(id) {
   _lastFocused = null;
 }
 function _trapFocus(e) {
+  if (e.key === 'Escape') { closeModal(e.currentTarget.id); return; }
   if (e.key !== 'Tab') return;
   const modal = e.currentTarget;
   const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
@@ -1363,9 +1367,20 @@ async function doCheckout() {
     const r = await api('POST','/payments/checkout',{service_id:selectedService.id,amount:selectedService.fee,channel});
     cacheBust('/auth/payments');
     document.getElementById('checkoutBtn').style.display = 'none';
-    document.getElementById('prnContainer').innerHTML = `<div class="prn-box"><div class="prn-label">Payment Reference Number</div><div class="prn-value">${r.prn}</div><div class="prn-note">UGX ${r.amount.toLocaleString()} via ${channel.replace(/_/g,' ')}</div></div>`;
-    showMsg('success',`PRN generated: ${r.prn}`, { applicationId: STATE.cartItems.length > 0 ? STATE.cartItems[STATE.cartItems.length-1].applicationId : null });
+    const appId = STATE.cartItems.length > 0 ? STATE.cartItems[STATE.cartItems.length-1].applicationId : null;
+    document.getElementById('prnContainer').innerHTML = `<div class="prn-box"><div class="prn-label">Payment Reference Number</div><div class="prn-value">${r.prn}</div><div class="prn-note">UGX ${r.amount.toLocaleString()} via ${channel.replace(/_/g,' ')}</div><button class="btn btn-primary" style="margin-top:12px" onclick="confirmPayment('${r.prn}')">Confirm Payment</button></div>`;
+    showMsg('success',`PRN generated: ${r.prn}`, { applicationId: appId });
   } catch(e) { showMsg('error',e.message); } finally { document.getElementById('checkoutBtn').disabled = false; }
+}
+async function confirmPayment(prn) {
+  try {
+    const r = await api('POST',`/payments/${prn}/confirm`);
+    if (r.status === 'paid') {
+      document.querySelector('#prnContainer .prn-box').innerHTML = `<div class="prn-label">Payment Status</div><div class="prn-value" style="color:var(--success)">PAID</div><div class="prn-note">Transaction completed successfully</div>`;
+      showMsg('success','Payment confirmed successfully');
+      loadPayments();
+    }
+  } catch(e) { showMsg('error',e.message); }
 }
 
 // ===== APPLICATIONS =====
@@ -1637,9 +1652,20 @@ async function loadDocuments() {
     grid.innerHTML = docs.map(d => {
       const c = typeColors[d.type] || '#2e6b9e';
       const ic = typeIcons[d.type] || 'description';
-      return `<div class="doc-card"><div class="doc-icon" style="background:${c}18;color:${c}"><span class="material-icons-round">${ic}</span></div><div class="doc-info"><div class="d-name">${d.name}</div><div class="d-meta">${d.type} &middot; Issued ${d.issued}${d.expiry ? ' &middot; Exp '+d.expiry : ''} &middot; ${d.file_size}</div></div><span class="doc-badge ${d.status}">${d.status}</span><button class="doc-dl material-icons-round" onclick="showMsg('success','Downloading ${d.id}...')" title="Download ${d.name}" aria-label="Download ${d.name}">download</button></div>`;
+      const safeId = d.id.replace(/'/g,"\\'");
+      return `<div class="doc-card"><div class="doc-icon" style="background:${c}18;color:${c}"><span class="material-icons-round">${ic}</span></div><div class="doc-info"><div class="d-name">${d.name}</div><div class="d-meta">${d.type} &middot; Issued ${d.issued}${d.expiry ? ' &middot; Exp '+d.expiry : ''} &middot; ${d.file_size}</div></div><span class="doc-badge ${d.status}">${d.status}</span><button class="doc-dl material-icons-round" onclick="downloadDoc('${safeId}','${d.name.replace(/'/g,"\\'")}')" title="Download ${d.name}" aria-label="Download ${d.name}">download</button></div>`;
     }).join('');
   } catch(e) { document.getElementById('docGrid').innerHTML = '<div class="empty-state"><div class="empty-icon material-icons-round">error_outline</div><h4>Failed to load</h4></div>'; }
+}
+
+function downloadDoc(id, name) {
+  const content = `UGSP Document Wallet Export\n==========================\nDocument ID: ${id}\nName: ${name}\nDownloaded: ${new Date().toISOString()}\n\nThis document is digitally signed by the Government of Uganda.\nVerify at: https://ugsp.go.ug/verify/${id}\n`;
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${name.replace(/[^a-zA-Z0-9]/g,'_')}.txt`; a.click();
+  URL.revokeObjectURL(url);
+  showMsg('success',`Downloaded: ${name}`);
 }
 
 // ===== PAYMENTS =====

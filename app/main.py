@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from app.core.middleware import DPPAComplianceMiddleware
+from app.core.middleware import DPPAComplianceMiddleware, RateLimitMiddleware
 from app.api.v1 import auth, catalogue, applications, payments
 from app.api.v1.uploads.photo import router as uploads_router
 
@@ -23,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(RateLimitMiddleware)
 app.add_middleware(DPPAComplianceMiddleware)
 
 app.include_router(auth.router)
@@ -50,4 +51,12 @@ async def service_worker():
                         headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"})
 
 
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR), check_dir=False), name="static")
+
+
+@app.middleware("http")
+async def static_cache(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/static/") and response.status_code == 200:
+        response.headers["Cache-Control"] = "public, max-age=86400, immutable"
+    return response

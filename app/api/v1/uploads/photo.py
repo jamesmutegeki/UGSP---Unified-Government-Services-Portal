@@ -1,5 +1,5 @@
-import os
 import uuid
+import asyncio
 from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, Header, HTTPException
 
@@ -28,7 +28,13 @@ async def upload_photo(
     ext = "jpg"
     filename = f"{nin}_{uuid.uuid4().hex[:8]}.{ext}"
     filepath = UPLOAD_DIR / filename
-    with open(filepath, "wb") as f:
-        f.write(content)
+    await asyncio.to_thread(lambda: None)  # yield to event loop
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, _write_file, filepath, content)
     photo_url = f"/static/uploads/{filename}"
     return {"photo_url": photo_url, "message": "Photo uploaded successfully"}
+
+
+def _write_file(path: Path, content: bytes) -> None:
+    with open(path, "wb") as f:
+        f.write(content)

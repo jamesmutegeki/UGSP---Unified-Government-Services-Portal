@@ -1,12 +1,13 @@
 import re
-import copy
+import hashlib
+import secrets
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 
-from app.core.auth import verify_token
+from app.core.auth import verify_token, VALID_TOKENS
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -157,35 +158,38 @@ class ChangePasswordResponse(BaseModel):
     message: str
 
 
-# --- Mock data ---
-MOCK_USERS: dict[str, dict] = {
-    "T1234567890": {"name": "Grace Akello", "email": "grace.akello@ugpass.go.ug", "phone": "+256 700 000 001", "password": "pass123", "category": "citizen", "photo_url": None, "notifications": ["Welcome to UGSP, Grace!", "Your National ID application has been received."]},
-    "T2345678901": {"name": "John Okello", "email": "john.okello@ugpass.go.ug", "phone": "+256 700 000 002", "password": "pass123", "category": "business", "photo_url": None, "notifications": ["Your business registration is under review."]},
-    "T9876543210": {"name": "Sarah Nabatanzi", "email": "sarah.nabatanzi@ugpass.go.ug", "phone": "+256 700 000 003", "password": "pass123", "category": "citizen", "photo_url": None, "notifications": ["Your passport application has been approved!"]},
-}
+def _hash(s: str) -> str:
+    return hashlib.sha256(s.encode()).hexdigest()
+
+def _mk_token() -> str:
+    return secrets.token_hex(32)
 
 PENDING_RESETS: dict[str, str] = {}
 PENDING_2FA: dict[str, str] = {}
 FEEDBACK_DB: list[dict] = []
-REGISTER_COUNTER = len(MOCK_USERS)
+REGISTER_COUNTER = 3
+
+MOCK_USERS: dict[str, dict] = {
+    "T1234567890": {"name": "Grace Akello", "email": "grace.akello@ugpass.go.ug", "phone": "+256 700 000 001", "password": _hash("pass123"), "category": "citizen", "photo_url": None, "notifications": ["Welcome to UGSP, Grace!", "Your National ID application has been received."]},
+    "T2345678901": {"name": "John Okello", "email": "john.okello@ugpass.go.ug", "phone": "+256 700 000 002", "password": _hash("pass123"), "category": "business", "photo_url": None, "notifications": ["Your business registration is under review."]},
+    "T9876543210": {"name": "Sarah Nabatanzi", "email": "sarah.nabatanzi@ugpass.go.ug", "phone": "+256 700 000 003", "password": _hash("pass123"), "category": "citizen", "photo_url": None, "notifications": ["Your passport application has been approved!"]},
+}
 
 
 # --- Login ---
 @router.post("/login")
 async def login(req: LoginRequest):
     user = MOCK_USERS.get(req.nin)
-    if not user or user.get("password", "") != req.password:
+    if not user or user.get("password", "") != _hash(req.password):
         raise HTTPException(status_code=401, detail="Invalid NIN or password")
 
-    minute_str = f"{datetime.utcnow().minute:02d}"
-    code = f"{req.nin[-4:]}{minute_str}"
+    code = f"{req.nin[-4:]}{datetime.utcnow().minute:02d}"
     PENDING_2FA[req.nin] = code
     return {
         "token": f"2fa_{req.nin}",
         "name": user["name"],
         "email": user["email"],
         "nin": req.nin,
-        "demo_2fa_code": code,
     }
 
 
@@ -198,7 +202,9 @@ async def verify_2fa(req: TwoFactorRequest):
     if req.code != expected:
         raise HTTPException(status_code=401, detail="Invalid 2FA code")
     del PENDING_2FA[req.nin]
-    token = f"ugpass_{req.nin}_{req.nin[:4]}"
+    raw = _mk_token()
+    VALID_TOKENS[_hash(raw)] = req.nin
+    token = f"ugpass_{req.nin}_{raw}"
     user = MOCK_USERS.get(req.nin)
     return {"token": token, "name": user["name"], "email": user["email"], "nin": req.nin}
 
@@ -214,12 +220,14 @@ async def register(req: RegisterRequest):
         "name": req.name,
         "email": req.email,
         "phone": req.phone,
-        "password": req.password,
+        "password": _hash(req.password),
         "category": req.category,
         "photo_url": None,
         "notifications": ["Welcome to UGSP! Your account has been created successfully."],
     }
-    token = f"ugpass_{req.nin}_{req.nin[:4]}"
+    raw = _mk_token()
+    VALID_TOKENS[_hash(raw)] = req.nin
+    token = f"ugpass_{req.nin}_{raw}"
     return {"token": token, "name": req.name, "email": req.email, "nin": req.nin, "message": "Account created successfully"}
 
 
@@ -230,7 +238,7 @@ async def forgot_password(req: ForgotPasswordRequest):
         raise HTTPException(status_code=404, detail="NIN not found")
     code = f"RESET{req.nin[-4:]}"
     PENDING_RESETS[req.nin] = code
-    return {"message": f"A reset code has been sent to your registered phone/email. Use code: {code}"}
+    return {"message": "A reset code has been sent to your registered phone/email."}
 
 
 @router.post("/reset-password")
@@ -240,7 +248,7 @@ async def reset_password(req: ResetPasswordRequest):
         raise HTTPException(status_code=400, detail="Invalid reset code")
     if req.nin not in MOCK_USERS:
         raise HTTPException(status_code=404, detail="NIN not found")
-    MOCK_USERS[req.nin]["password"] = req.new_password
+    MOCK_USERS[req.nin]["password"] = _hash(req.new_password)
     del PENDING_RESETS[req.nin]
     return {"message": "Password reset successfully"}
 
@@ -330,9 +338,9 @@ async def change_password(req: ChangePasswordRequest, authorization: str = Heade
     user = MOCK_USERS.get(nin)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if user["password"] != req.current_password:
+    if user["password"] != _hash(req.current_password):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
-    user["password"] = req.new_password
+    user["password"] = _hash(req.new_password)
     return {"message": "Password changed successfully"}
 
 

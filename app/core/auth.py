@@ -1,4 +1,9 @@
+import hashlib
+
 from fastapi import HTTPException
+
+# Shared token store (populated by auth routes)
+VALID_TOKENS: dict[str, str] = {}
 
 
 def verify_token(authorization: str | None) -> str:
@@ -8,6 +13,10 @@ def verify_token(authorization: str | None) -> str:
     if not token.startswith("ugpass_"):
         raise HTTPException(status_code=401, detail="Invalid token")
     parts = token.replace("ugpass_", "", 1).split("_", 1)
-    if len(parts) < 1 or len(parts[0]) < 10:
+    if len(parts) < 2:
         raise HTTPException(status_code=401, detail="Invalid token")
-    return parts[0]
+    nin, raw = parts[0], parts[1]
+    expected = VALID_TOKENS.get(hashlib.sha256(raw.encode()).hexdigest())
+    if expected != nin:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return nin
